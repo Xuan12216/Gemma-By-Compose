@@ -1,0 +1,202 @@
+<resources>
+    <string name="app_name">Gemini</string>
+
+    <string name="EditText_hint">在此输入提示</string>
+    <string name="EditText_hint_api">Enter a API key here</string>
+    <string name="get_api_key_url">https://ai.google.dev/</string>
+    <string name="what_is_api_key">何謂API：API 金鑰通常由 API 提供者提供，並且需要在應用程式中設定。應用程式在向 API 發出請求時會提供 API 密鑰，API 提供者會使用該密鑰來驗證應用程式是否有權存取 API。本App必須使用API。</string>
+    <string name="get_api_hint">沒有 API key ? 可以點 這裏</string>
+    <string name="editText_empty">請輸入API key</string>
+
+    <string-array name="settingsItem">
+        <item>設定名字，圖片</item>
+        <item>設定模型參數</item>
+        <item>設定安全參數</item>
+        <item>設定apiKey</item>
+    </string-array>
+
+    <string-array name="settingsIcon">
+        <item>setting_name</item>
+        <item>setting_parameter</item>
+        <item>setting_safe</item>
+        <item>setting_api</item>
+    </string-array>
+
+    <string-array name="moreFuncItem">
+        <item>AI翻譯</item>
+        <item>分析摘要</item>
+        <item>創作</item>
+        <item>行程規劃</item>
+    </string-array>
+
+    <string-array name="moreFuncIcon">
+        <item>g_translate_24px</item>
+        <item>analytics_24px</item>
+        <item>draw_24px</item>
+        <item>luggage_24px</item>
+    </string-array>
+
+    <string name="moreFuncTitle">更多功能</string>
+
+    <string name="temperature_content">temperature：輸出內容的隨機性。越接近 1.0，產生的回應會豐富、多元、更有創意；反之越接近 0.0，則會產生較有確定性、可能性較高的回覆。</string>
+    <string name="topK_content">topK：參數會變更模型選取輸出符記的方式。topK 為 1 表示所選符記是模型詞彙表的所有符記中可能性最高者 (也稱為「貪婪解碼」)。如果 topK 為 3，則代表模型會依據隨機性參數，從可能性最高的 3 個符記中選取下一個符記。在每個符記選取步驟中，模型會對機率最高的 topK 符記取樣。接著，系統會依據 topP 進一步篩選符記，最後使用溫度取樣選出最終符記。</string>
+    <string name="topP_content">topP：參數會變更模型選取輸出符記的方式。模型會按照可能性最高到最低的順序選取符記，直到所選符記的可能性總和等於 topP 值。舉例來說，如果符記 A、B 和 C 的可能性分別為 0.3、0.2 和 0.1，而 topP 值為 0.5，模型就會根據隨機性參數選擇 A 或 B 做為下一個符記，並排除 C。topP 的預設值為 0.95。</string>
+    <string name="stop_sequences_content">stopSequences：設定停止序列，指示模型停止產生內容。停止序列可以是任何字元序列。請避免使用可能出現在產生內容中的字元序列。</string>
+    <string name="max_output_token_content">maxOutputTokens：最大輸出回應 Token 數量。Gemini Pro 模型預設 2048；Gemini Pro Vision 模型預設 4096。</string>
+    <string name="candidate_count_content">candidateCount：要傳回的回應數量。預設 1，可設定 1~8，但目前好像限制只能用 1。</string>
+    <string name="accept_btn_content">!!! 點擊後，模型會進行參數調整，所以之前的聊天記憶功能會重置。</string>
+
+    //safe
+    <string name="harassment_content">HARASSMENT(騷擾)：涉及身分和/或受保護屬性的負面或有害留言。</string>
+    <string name="hate_speech_content">HATE_SPEECH(仇恨言論)：粗俗、無禮或不雅內容。</string>
+    <string name="sexually_explicit_content">SEXUALLY_EXPLICIT(煽情露骨內容)：含有性行為或其他猥褻內容。</string>
+    <string name="dangerous_content">DANGEROUS_CONTENT(危險)：宣傳、鼓吹或助長有害舉動。</string>
+
+    <string name="harassment">HARASSMENT(騷擾)</string>
+    <string name="hate_speech">HATE_SPEECH(仇恨言論)</string>
+    <string name="sexually_explicit">SEXUALLY_EXPLICIT(煽情露骨內容)</string>
+    <string name="dangerous">DANGEROUS_CONTENT(危險)</string>
+
+    <string name="status_true">狀態：目前已有API key</string>
+    <string name="status_false">狀態：目前沒有API key</string>
+
+    <string name="block_none">BLOCK_NONE(不封鎖任何項目)：無論內容是否可能不安全，一律顯示</string>
+    <string name="block_only_hig">BLOCK_ONLY_HIGH(封鎖少數)：出現極可能不安全的內容時封鎖</string>
+    <string name="block_medium_and_above">BLOCK_MEDIUM_AND_ABOVE(封鎖一些)：針對中度或極高的不安全內容一律封鎖</string>
+    <string name="block_low_and_above">BLOCK_LOW_AND_ABOVE(封鎖多數)：針對低、中或高可能不安全的內容封鎖</string>
+    <string name="harm_block_threshold_unspecified">HARM_BLOCK_THRESHOLD_UNSPECIFIED(預設)：未指定門檻，使用預設閾值封鎖</string>
+
+    //name
+    <string name="name">用戶名：</string>
+    <string name="gemini_name">Gemini名：</string>
+    <string name="enter_name">輸入用戶名</string>
+    <string name="enter_gemini_name">輸入Gemini名</string>
+    <string name="successfully_toast">修改成功!</string>
+
+    //menu
+    <string name="info_title">詳情</string>
+    <string name="setting_title">設定</string>
+
+    //menuMore
+    <string name="menu_pin">置頂</string>
+    <string name="menu_uppin">取消置頂</string>
+    <string name="menu_rename">重命名</string>
+    <string name="menu_delete">刪除</string>
+
+    //rename
+    <string name="rename_title">重命名此聊天記錄嗎？</string>
+    <string name="rename_accept">重命名</string>
+    <string name="rename_cancel">取消</string>
+    <string name="rename_repeat">標題重複，請重新輸入</string>
+    <string name="rename_successful">成功</string>
+    <string name="rename_error">請重新輸入</string>
+    <string name="delete_title">刪除此聊天記錄嗎？</string>
+    <string name="delete_accept">確認</string>
+
+    //record
+    <string name="record_value">說點什麼吧…</string>
+
+    //flexbox
+    <string-array name="flexboxItem">
+        <item>計劃一次旅行 : 像當地人一樣體驗首爾</item>
+        <item>給我看一個代碼片段 : 網站的粘性標題</item>
+        <item>給我想法 : 我孩子的藝術該怎麼辦</item>
+        <item>比較業務策略 : 從預算過渡到豪華與盧…</item>
+        <item>製定鍛煉計劃 : 用於阻力訓練</item>
+        <item>集思廣益的名字 : 對於一只橙色的貓，我們從…收養</item>
+        <item>解釋懷舊之情 : 給一名幼兒園老師</item>
+        <item>為我創建一個個人網頁 : 問了我三個問題後</item>
+        <item>幫我選一下 : 送給喜歡釣魚的爸爸的禮物</item>
+        <item>推薦活動 : 遠程員工團隊建設日……</item>
+        <item>製作美味的家庭晚餐 : 新鮮食材，簡單食譜</item>
+        <item>學習新的手工藝 : 例如織毛衣或製作陶器</item>
+        <item>規劃下一個假期 : 探索未知的目的地</item>
+        <item>閱讀一本經典小說 : 重新發現文學的魅力</item>
+        <item>挑戰自己 : 完成一項新的運動或運動挑戰</item>
+        <item>分享一次美食之旅 : 探索當地的餐廳和小吃</item>
+        <item>參加誌工活動 : 為社區或慈善機構貢獻時間</item>
+        <item>探索當地的自然景點 : 遠離城市喧囂，感受大自然的美麗</item>
+        <item>學習新的語言 : 開拓視野，與世界溝通</item>
+        <item>嘗試烹調一道國際美食 : 體驗不同文化的味道</item>
+        <item>建立一個家庭遊樂區 : 為孩子們創造一個快樂的空間</item>
+        <item>發現當地博物館或美術館 : 欣賞藝術與歷史的魅力</item>
+        <item>開始一個健康的生活方式 : 運動，飲食和心理健康的平衡</item>
+        <item>體驗戶外冒險活動 : 遠足，露營或劃橡皮艇等</item>
+        <item>學習一項新的技能 : 例如攝影，程式設計或音樂製作</item>
+        <item>籌辦一場家庭電影夜 : 選擇一部大家都喜歡的電影</item>
+        <item>重新佈置家裡的一個房間 : 創造一個舒適和溫馨的空間</item>
+        <item>參加當地的文化活動 : 音樂會，藝術展覽或戲劇表演</item>
+        <item>準備一頓精緻的自製早午餐 : 美味的食物和愉快的氛圍</item>
+        <item>學習如何種植自己的蔬菜 : 享受自給自足的樂趣</item>
+    </string-array>
+
+    //pickImage
+    <string name="useCameraPickImage">打开相机</string>
+    <string name="useGalleryPickImage">打开图库</string>
+
+    //welcomeText
+    <string name="welcome_text">歡迎來到 Gemini！ 有什麼問題或需求我可以幫你解決嗎？</string>
+
+    //addNotes
+    <string name="add_notes_toast">添加新聊天成功！</string>
+    <string name="add_notes_toast1">請稍後重試！</string>
+
+    //info
+    <string name="info_url">https://ai.google.dev/</string>
+    <string name="info_load_success">加载成功！</string>
+    <string name="info_load_fail">加载失败，请检查网络连接或重试！</string>
+
+    //navigation
+    <string name="navigation_history">歷史記錄</string>
+    <string name="searchEditText">搜尋</string>
+    <string name="today">今日</string>
+    <string name="yesterday">昨天</string>
+
+    //copy
+    <string name="copySuccess">複製成功</string>
+
+    //tts
+    <string name="ttsSuccess">開始播放</string>
+    <string name="ttsError">播放失敗</string>
+
+    //google search
+    <string name="google_search">即將打開瀏覽器</string>
+
+    //translate
+    <string-array name="languages">
+        <item>偵測語言</item>
+        <item>英文(美國)</item>
+        <item>英文(英國)</item>
+        <item>中文(簡體)</item>
+        <item>中文(繁體)</item>
+        <item>土耳其文</item>
+        <item>日文</item>
+        <item>印尼文</item>
+        <item>西班牙文(西班牙)</item>
+        <item>法文</item>
+        <item>波蘭文</item>
+        <item>阿拉伯文</item>
+        <item>俄文</item>
+        <item>泰文</item>
+        <item>烏克蘭文</item>
+        <item>荷蘭文</item>
+        <item>越南文</item>
+        <item>意大利文</item>
+        <item>葡萄牙文</item>
+        <item>葡萄牙文(巴西)</item>
+        <item>德文</item>
+        <item>韓文</item>
+    </string-array>
+
+    <string name="language_cannot_change">您選擇了"偵測語言"所以不能切換</string>
+    <string name="spinner1_title">原文語言</string>
+    <string name="spinner2_title">譯文語言</string>
+    <string name="spinner_btn">取消</string>
+    <string name="translate_title">AI翻譯</string>
+
+    //welcomeText
+    <string name="translate_welcome_text">歡迎來到 Gemini 翻譯服務！ 我們致力於為您提供高品質的翻譯服務。</string>
+    <string name="translate_context1">請幫我翻譯内容，</string>
+    <string name="new_translation">新翻譯</string>
+    <string name="translate_history">翻譯記錄</string>
+</resources>

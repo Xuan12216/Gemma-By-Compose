@@ -1,0 +1,201 @@
+<resources>
+    <string name="app_name">Gemini</string>
+
+    <string name="EditText_hint">Enter a prompt here</string>
+    <string name="EditText_hint_api">Enter a API key here</string>
+    <string name="get_api_key_url">https://ai.google.dev/</string>
+    <string name="what_is_api_key">What is an API: API keys are usually provided by the API provider and need to be set in the application. An application provides an API key when making a request to the API, which is used by the API provider to verify that the application has permission to access the API. This App must use API.</string>
+    <string name="get_api_hint">Don’t have an API key? You can click here</string>
+    <string name="editText_empty">Please enter API key</string>
+
+    <string-array name="settingsItem">
+        <item>Set name, picture</item>
+        <item>Set model parameters</item>
+        <item>Set security parameters</item>
+        <item>Set apiKey</item>
+    </string-array>
+
+    <string-array name="settingsIcon">
+        <item>setting_name</item>
+        <item>setting_parameter</item>
+        <item>setting_safe</item>
+        <item>setting_api</item>
+    </string-array>
+
+    <string-array name="moreFuncItem">
+        <item>AI translation</item>
+        <item>Analysis summary</item>
+        <item>Creation</item>
+        <item>Trip Planning</item>
+    </string-array>
+
+    <string-array name="moreFuncIcon">
+        <item>g_translate_24px</item>
+        <item>analytics_24px</item>
+        <item>draw_24px</item>
+        <item>luggage_24px</item>
+    </string-array>
+
+    <string name="moreFuncTitle">More Function</string>
+
+    <string name="temperature_content">temperature: the randomness of the output content. The closer it is to 1.0, the responses will be richer, more diverse, and more creative; conversely, the closer it is to 0.0, the responses will be more certain and more likely.</string>
+    <string name="topK_content">topK: The parameter changes the way the model selects output tokens. A topK of 1 means that the selected token is the most likely token among all tokens in the model vocabulary (also known as "greedy decoding"). If topK is 3, it means that the model will select the next symbol from the three most likely symbols based on the randomness parameter. In each token selection step, the model samples the topK tokens with the highest probability. Then, the system will further filter the symbols based on topP, and finally use temperature sampling to select the final symbol.</string>
+    <string name="topP_content">topP: The parameter changes the way the model selects output tokens. The model will select tokens in order from most likely to least likely until the sum of the likelihoods of the selected tokens equals the topP value. For example, if the probabilities of tokens A, B, and C are 0.3, 0.2, and 0.1 respectively, and the topP value is 0.5, the model will select A or B as the next token based on the randomness parameter, and exclude C . The default value of topP is 0.95.</string>
+    <string name="stop_sequences_content">stopSequences: Set the stop sequence to instruct the model to stop generating content. The stop sequence can be any sequence of characters. Please avoid using character sequences that may appear in generated content.</string>
+    <string name="max_output_token_content">maxOutputTokens: The maximum number of output response Tokens. Gemini Pro model preset 2048; Gemini Pro Vision model preset 4096.</string>
+    <string name="candidate_count_content">candidateCount: The number of responses to be returned. Default is 1, can be set to 1~8, but currently it seems to be limited to 1.</string>
+    <string name="accept_btn_content">!!! After clicking, the model will adjust parameters, so the previous chat memory function will be reset.</string>
+
+    //safe
+    <string name="harassment_content">HARASSMENT: Negative or harmful comments involving identity and/or protected attributes.</string>
+    <string name="hate_speech_content">HATE_SPEECH: Vulgar, offensive or indecent content.</string>
+    <string name="sexually_explicit_content">SEXUALLY_EXPLICIT (sensational and explicit content): Contains sexual behavior or other obscene content.</string>
+    <string name="dangerous_content">DANGEROUS_CONTENT: Promotes, encourages, or promotes harmful behavior.</string>
+
+    <string name="harassment">HARASSMENT</string>
+    <string name="hate_speech">HATE_SPEECH</string>
+    <string name="sexually_explicit">SEXUALLY_EXPLICIT</string>
+    <string name="dangerous">DANGEROUS_CONTENT</string>
+
+    <string name="status_true">Status: There is currently an API key</string>
+    <string name="status_false">Status: Currently no API key</string>
+
+    <string name="block_none">BLOCK_NONE (do not block any items): Display regardless of whether the content may be unsafe</string>
+    <string name="block_only_hig">BLOCK_ONLY_HIGH (block a few): Block when content that is highly likely to be unsafe appears</string>
+    <string name="block_medium_and_above">BLOCK_MEDIUM_AND_ABOVE (block some): Block all moderately or extremely unsafe content</string>
+    <string name="block_low_and_above">BLOCK_LOW_AND_ABOVE: Block content that is low, medium or high likely to be unsafe</string>
+    <string name="harm_block_threshold_unspecified">HARM_BLOCK_THRESHOLD_UNSPECIFIED (default): No threshold is specified, use the default threshold to block</string>
+
+    //name
+    <string name="name">YourName：</string>
+    <string name="gemini_name">Gemini Name：</string>
+    <string name="enter_name">Enter Your Name</string>
+    <string name="enter_gemini_name">Enter Gemini Name</string>
+    <string name="successfully_toast">Successfully modified!</string>
+
+    //menu
+    <string name="info_title">Info</string>
+    <string name="setting_title">Setting</string>
+
+    //menuMore
+    <string name="menu_pin">Pin</string>
+    <string name="menu_uppin">UnPin</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_delete">Delete</string>
+
+    //rename
+    <string name="rename_title">Rename this chat?</string>
+    <string name="rename_accept">Rename</string>
+    <string name="rename_cancel">Cancel</string>
+    <string name="rename_repeat">Title again, try again</string>
+    <string name="rename_successful">Success</string>
+    <string name="rename_error">Error, try again</string>
+    <string name="delete_title">Delete this chat?</string>
+    <string name="delete_accept">Accept</string>
+
+    //record
+    <string name="record_value">Speak something…</string>
+
+    <string-array name="flexboxItem">
+        <item>Plan a trip: Experience Seoul like a local</item>
+        <item>Show me a code snippet: Sticky title for website</item>
+        <item>Get ideas: What to do with my child’s art</item>
+        <item>Compare Business Strategies: Budget to Luxury vs Luxury…</item>
+        <item>Develop an exercise plan: resistance training</item>
+        <item>Brainstorm names: For an orange cat adoption</item>
+        <item>Explain Nostalgia: To a Kindergarten Teacher</item>
+        <item>Create a personal webpage: after three questions</item>
+        <item>Help me choose: a gift for dad who loves fishing</item>
+        <item>Recommended activity: Remote employee team building day…</item>
+        <item>Make family dinners: fresh ingredients, simple recipes</item>
+        <item>Learn a new craft: knitting or pottery making</item>
+        <item>Plan your next vacation: Explore unknown destinations</item>
+        <item>Read a classic novel: rediscover literary charm</item>
+        <item>Challenge yourself: Complete a new sport or challenge</item>
+        <item>Share a food journey: explore local cuisine</item>
+        <item>Participate in volunteer activities: donate time to charity</item>
+        <item>Outline a social media post: for my network</item>
+        <item>Learn a new language: broaden horizons</item>
+        <item>Cook an international dish: taste different cultures</item>
+        <item>Build a family play area: create a happy space</item>
+        <item>Discover a local museum or gallery: appreciate art and history</item>
+        <item>Start a healthy lifestyle: balance exercise, diet, mental health</item>
+        <item>Experience outdoor adventure: hiking, camping, kayaking</item>
+        <item>Learn a new skill: photography, programming, music</item>
+        <item>Plan a family movie night: choose a movie</item>
+        <item>Rearrange a room: Create a welcoming space</item>
+        <item>Attend a cultural event: concert, art exhibition, theater</item>
+        <item>Prepare a homemade brunch: delicious food, pleasant atmosphere</item>
+        <item>Learn how to grow vegetables: enjoy self-sufficiency</item>
+    </string-array>
+
+    //pickImage
+    <string name="useCameraPickImage">Open Camera</string>
+    <string name="useGalleryPickImage">Open Gallery</string>
+
+    //welcomeText
+    <string name="welcome_text">Welcome to Gemini ! How can I help you today ?</string>
+
+    //addNotes
+    <string name="add_notes_toast">New chat added successfully !</string>
+    <string name="add_notes_toast1">Please try again later !</string>
+
+    //info
+    <string name="info_url">https://ai.google.dev/</string>
+    <string name="info_load_success">Loading successful! </string>
+    <string name="info_load_fail">Loading failed, please check the network connection or try again! </string>
+
+    //navigation
+    <string name="navigation_history">Recent</string>
+    <string name="searchEditText">Search</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+
+    //copy
+    <string name="copySuccess">Copied</string>
+
+    //tts
+    <string name="ttsSuccess">start play</string>
+    <string name="ttsError">tts error</string>
+
+    //google search
+    <string name="google_search">Opening Browser</string>
+
+    //translate
+    <string-array name="languages">
+        <item>Detect language</item>
+        <item>English(US)</item>
+        <item>English(UK)</item>
+        <item>Chinese(Simplified)</item>
+        <item>Chinese(Traditional)</item>
+        <item>Turkish</item>
+        <item>Japanese</item>
+        <item>Indonesian</item>
+        <item>Spanish (Spain)</item>
+        <item>French</item>
+        <item>Polish</item>
+        <item>Arabic</item>
+        <item>Russian</item>
+        <item>Thai</item>
+        <item>Ukrainian</item>
+        <item>Dutch</item>
+        <item>Vietnamese</item>
+        <item>Italian</item>
+        <item>Portuguese</item>
+        <item>Portuguese (Brazil)</item>
+        <item>German</item>
+        <item>Korean</item>
+    </string-array>
+
+    <string name="language_cannot_change">"Detection language" cannot be changed if selected</string>
+    <string name="spinner1_title">Translate from</string>
+    <string name="spinner2_title">Translate to</string>
+    <string name="spinner_btn">Cancel</string>
+    <string name="translate_title">AI translation</string>
+
+    //welcomeText
+    <string name="translate_welcome_text">Welcome to Gemini Translation Services! How can I help you today ?</string>
+    <string name="translate_context1">Please help me translate the content,</string>
+    <string name="new_translation">New translation</string>
+    <string name="translate_history">History</string>
+</resources>
