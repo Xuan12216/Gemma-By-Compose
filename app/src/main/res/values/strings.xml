@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Gemini</string>
+    <string name="app_name">Gemma</string>
 
     <string name="EditText_hint">在此输入提示</string>
     <string name="EditText_hint_api">Enter a API key here</string>
@@ -42,7 +42,7 @@
     <string name="topK_content">topK：參數會變更模型選取輸出符記的方式。topK 為 1 表示所選符記是模型詞彙表的所有符記中可能性最高者 (也稱為「貪婪解碼」)。如果 topK 為 3，則代表模型會依據隨機性參數，從可能性最高的 3 個符記中選取下一個符記。在每個符記選取步驟中，模型會對機率最高的 topK 符記取樣。接著，系統會依據 topP 進一步篩選符記，最後使用溫度取樣選出最終符記。</string>
     <string name="topP_content">topP：參數會變更模型選取輸出符記的方式。模型會按照可能性最高到最低的順序選取符記，直到所選符記的可能性總和等於 topP 值。舉例來說，如果符記 A、B 和 C 的可能性分別為 0.3、0.2 和 0.1，而 topP 值為 0.5，模型就會根據隨機性參數選擇 A 或 B 做為下一個符記，並排除 C。topP 的預設值為 0.95。</string>
     <string name="stop_sequences_content">stopSequences：設定停止序列，指示模型停止產生內容。停止序列可以是任何字元序列。請避免使用可能出現在產生內容中的字元序列。</string>
-    <string name="max_output_token_content">maxOutputTokens：最大輸出回應 Token 數量。Gemini Pro 模型預設 2048；Gemini Pro Vision 模型預設 4096。</string>
+    <string name="max_output_token_content">maxOutputTokens：最大輸出回應 Token 數量。gemma Pro 模型預設 2048；gemma Pro Vision 模型預設 4096。</string>
     <string name="candidate_count_content">candidateCount：要傳回的回應數量。預設 1，可設定 1~8，但目前好像限制只能用 1。</string>
     <string name="accept_btn_content">!!! 點擊後，模型會進行參數調整，所以之前的聊天記憶功能會重置。</string>
 
@@ -68,9 +68,9 @@
 
     //name
     <string name="name">用戶名：</string>
-    <string name="gemini_name">Gemini名：</string>
+    <string name="gemma_name">gemma名：</string>
     <string name="enter_name">輸入用戶名</string>
-    <string name="enter_gemini_name">輸入Gemini名</string>
+    <string name="enter_gemma_name">輸入gemma名</string>
     <string name="successfully_toast">修改成功!</string>
 
     //menu
@@ -135,7 +135,7 @@
     <string name="useGalleryPickImage">打开图库</string>
 
     //welcomeText
-    <string name="welcome_text">歡迎來到 Gemini！ 有什麼問題或需求我可以幫你解決嗎？</string>
+    <string name="welcome_text">歡迎來到 gemma！ 有什麼問題或需求我可以幫你解決嗎？</string>
 
     //addNotes
     <string name="add_notes_toast">添加新聊天成功！</string>
@@ -195,7 +195,7 @@
     <string name="translate_title">AI翻譯</string>
 
     //welcomeText
-    <string name="translate_welcome_text">歡迎來到 Gemini 翻譯服務！ 我們致力於為您提供高品質的翻譯服務。</string>
+    <string name="translate_welcome_text">歡迎來到 gemma 翻譯服務！ 我們致力於為您提供高品質的翻譯服務。</string>
     <string name="translate_context1">請幫我翻譯内容，</string>
     <string name="new_translation">新翻譯</string>
     <string name="translate_history">翻譯記錄</string>

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:enableOnBackInvokedCallback="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,12 +11,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Gemini"
-        tools:targetApi="31">
+        android:theme="@style/Theme.gemma"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Gemini"
+            android:theme="@style/Theme.gemma"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +27,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.xuan.gemini.fileprovider"
+            android:authorities="com.xuan.gemma.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

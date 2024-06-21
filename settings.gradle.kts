@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Gemini"
+rootProject.name = "gemma"
 include(":app")
  
