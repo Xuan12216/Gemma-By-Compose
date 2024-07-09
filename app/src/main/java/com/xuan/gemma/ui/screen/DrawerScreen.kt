@@ -3,9 +3,6 @@ package com.xuan.gemma.ui.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -43,6 +40,7 @@ object MainFunc {
         )
     )
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MyDrawerLayout(
         drawerState: DrawerState,
@@ -54,6 +52,9 @@ object MainFunc {
         val scope = rememberCoroutineScope()
         var selectedItemIndex by rememberSaveable { mutableIntStateOf(-1) }
         var text by remember { mutableStateOf("") }
+        var active by remember { mutableStateOf(false) }
+
+        LaunchedEffect(drawerState.currentValue) { if (!drawerState.isOpen) { active = false } }
 
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -62,25 +63,18 @@ object MainFunc {
                 ModalDrawerSheet (
                     modifier = Modifier.fillMaxWidth(0.85f)
                 ){
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = text,
-                        onValueChange = { text = it },
+                    SearchBar(
+                        query = text,
+                        onQueryChange = { text = it },
+                        onSearch = { active = false },
+                        active = active,
+                        onActiveChange = { active = it },
+                        placeholder = { Text(stringResource(id = R.string.searchEditText)) },
+                        leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(if (!active) 16.dp else 0.dp)
                             .fillMaxWidth(),
-                        label = { Text(stringResource(id = R.string.searchEditText)) },
-                        shape = RoundedCornerShape(50.dp),
-                        keyboardOptions = KeyboardOptions.Default,
-                        keyboardActions = KeyboardActions.Default,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Search,
-                                contentDescription = stringResource(id = R.string.searchEditText)
-                            )
-                        }
-                    )
+                    ){}
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -123,7 +117,10 @@ object MainFunc {
                     recordFunc = recordFunc,
                     pickImageFunc = pickImageFunc,
                     pickImageUsingCamera = pickImageUsingCamera,
-                    paddingValues = paddingValues)
+                    paddingValues = paddingValues,
+                    active = active,
+                    onActiveChange = { active = it }
+                )
             }
         }
     }

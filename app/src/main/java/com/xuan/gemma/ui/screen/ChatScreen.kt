@@ -63,23 +63,27 @@ internal fun ChatRoute(
     pickImageUsingCamera: PickImageUsingCamera,
     chatViewModel: ChatViewModel = viewModel(
         factory = ChatViewModel.getFactory(LocalContext.current.applicationContext)
-    )
+    ),
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit
 ) {
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
 
     ChatScreen(
-        pickImageFunc,
-        pickImageUsingCamera,
-        recordFunc,
-        paddingValues,
-        drawerState,
-        uiState,
-        textInputEnabled,
+        pickImageFunc = pickImageFunc,
+        pickImageUsingCamera = pickImageUsingCamera,
+        recordFunc = recordFunc,
+        paddingValues = paddingValues,
+        drawerState = drawerState,
+        uiState = uiState,
+        textInputEnabled = textInputEnabled,
         onSendMessage = { message, imageUris ->
             chatViewModel.sendMessage(message, imageUris)
         },
-        onClearMessages = { chatViewModel.clearMessages() }
+        onClearMessages = { chatViewModel.clearMessages() },
+        active = active,
+        onActiveChange = onActiveChange
     )
 }
 
@@ -94,7 +98,9 @@ fun ChatScreen(
     uiState: UiState,
     textInputEnabled: Boolean = true,
     onSendMessage: (String, List<Uri>) -> Unit,
-    onClearMessages: () -> Unit
+    onClearMessages: () -> Unit,
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit
 ) {
     var userMessage by rememberSaveable { mutableStateOf("") }
     //state============================================================================
@@ -149,17 +155,20 @@ fun ChatScreen(
         }
     }
     //backHandler=====
-    val backHandlerEnabled = drawerState.isOpen || previewerState.canClose || previewerState.animating
+    val backHandlerEnabled = drawerState.isOpen || previewerState.canClose || previewerState.animating || active
 
     BackHandler(enabled = backHandlerEnabled) {
         scope.launch {
-            when {
-                drawerState.isOpen -> drawerState.close()
-                previewerState.canClose -> {
-                    if (settingState.transformExit) previewerState.exitTransform()
-                    else previewerState.close()
+            if (!active) {
+                when {
+                    drawerState.isOpen -> drawerState.close()
+                    previewerState.canClose -> {
+                        if (settingState.transformExit) previewerState.exitTransform()
+                        else previewerState.close()
+                    }
                 }
             }
+            else onActiveChange(false)
         }
     }
 
@@ -239,7 +248,8 @@ fun ChatScreen(
             recordFunc = recordFunc,
             textFieldTrailingIcon1 = painterResource(id = R.drawable.baseline_keyboard_voice_24),
             textFieldTrailingIcon2 = painterResource(id = R.drawable.baseline_send_24),
-            textFieldContent = stringResource(id = R.string.EditText_hint)
+            textFieldContent = stringResource(id = R.string.EditText_hint),
+            isShowButton = true
         )
 
         //show image

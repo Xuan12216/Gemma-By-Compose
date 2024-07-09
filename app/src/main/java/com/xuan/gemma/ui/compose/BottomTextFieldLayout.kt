@@ -38,7 +38,8 @@ fun TextFieldLayout(
     recordFunc: RecordFunc,
     textFieldTrailingIcon1: Painter,
     textFieldTrailingIcon2: Painter,
-    textFieldContent: String
+    textFieldContent: String,
+    isShowButton: Boolean
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -48,19 +49,21 @@ fun TextFieldLayout(
             .fillMaxWidth()
             .padding(bottom = 5.dp, top = 5.dp)
     ){
-        //takeImageIcon=====
-        FilledIconButton(
-            onClick = filledIconBtnOnClick,
-            enabled = textInputEnabled,
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(start = 16.dp, end = 5.dp)
-        ) {
-            Icon(
-                painter = filledIconPainter,
-                contentDescription = filledIconContent
-            )
+        if (isShowButton) {
+            //takeImageIcon=====
+            FilledIconButton(
+                onClick = filledIconBtnOnClick,
+                enabled = textInputEnabled,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 16.dp)
+            ) {
+                Icon(
+                    painter = filledIconPainter,
+                    contentDescription = filledIconContent
+                )
+            }
         }
 
         //textField=====
@@ -71,7 +74,7 @@ fun TextFieldLayout(
             },
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 16.dp)
+                .padding(start = if (isShowButton) 5.dp else 16.dp, end = 16.dp)
                 .align(Alignment.Bottom)
                 .focusRequester(focusRequester),
             label = { Text(textFieldHint) },
