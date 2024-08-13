@@ -3,7 +3,9 @@ package com.xuan.gemma.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,14 +28,19 @@ import kotlinx.coroutines.withContext
 
 @Composable
 internal fun LoadingRoute(
-    onModelLoaded: () -> Unit = { }
+    onModelLoaded: () -> Unit = { },
+    onRetry: () -> Unit = { }
 ) {
     val context = LocalContext.current.applicationContext
     var errorMessage by remember { mutableStateOf("") }
 
     if (errorMessage != "") {
-        ErrorMessage(errorMessage)
-    } else {
+        ErrorMessage(
+            errorMessage,
+             onRetry
+        )
+    }
+    else {
         LoadingIndicator()
     }
 
@@ -56,6 +63,7 @@ internal fun LoadingRoute(
 @Composable
 fun LoadingIndicator() {
     Column(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -71,9 +79,11 @@ fun LoadingIndicator() {
 
 @Composable
 fun ErrorMessage(
-    errorMessage: String
+    errorMessage: String,
+    onRetry: () -> Unit
 ) {
     Box(
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -81,5 +91,8 @@ fun ErrorMessage(
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
         )
+        Button(onClick = onRetry) {
+            Text("Retry")
+        }
     }
 }

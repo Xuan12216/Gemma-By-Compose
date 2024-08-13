@@ -1,14 +1,14 @@
 [versions]
 agp = "8.3.2"
-kotlin = "1.9.0"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.8.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.8.3"
 activityCompose = "1.9.0"
 composeBom = "2024.06.00"
-generativeai = "0.8.0"
+generativeai = "0.9.0"
 guava = "33.2.0-android"
 reactive = "1.0.4"
 glide = "1.0.0-beta01"
@@ -18,8 +18,11 @@ imageViewer = "1.1.0-alpha.3"
 origeek_ui_version = "1.0.1-alpha.7"
 mediapipe_genai = "0.10.14"
 navigation-compose = "2.7.7"
-lifecycle-viewmodel-ktx = "2.7.0"
-lifecycleRuntimeComposeAndroid = "2.8.2"
+lifecycle-viewmodel-ktx = "2.8.3"
+lifecycleRuntimeComposeAndroid = "2.8.3"
+room_version = "2.6.1"
+gson_version = "2.11.0"
+ksp = "2.0.0-1.0.22"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,8 +52,14 @@ origeek-ui = { group = "com.github.jvziyaoyao", name = "OrigeekUI" , version.ref
 mediapipe_genai = { group = "com.google.mediapipe", name = "tasks-genai", version.ref = "mediapipe_genai"}
 navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose"}
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
+room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "room_version"}
+room-compiler = {group = "androidx.room", name = "room-compiler", version.ref = "room_version"}
+room-rxjava2 = {group = "androidx.room", name = "room-rxjava2", version.ref = "room_version"}
+room-ktx = {group = "androidx.room", name = "room-ktx", version.ref = "room_version"}
+gson = {group = "com.google.code.gson", name = "gson", version.ref = "gson_version"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

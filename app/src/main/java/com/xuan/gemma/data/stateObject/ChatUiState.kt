@@ -3,13 +3,16 @@ package com.xuan.gemma.data.stateObject
 import android.net.Uri
 import androidx.compose.runtime.toMutableStateList
 import com.xuan.gemma.data.ChatMessage
+import java.util.UUID
 
 const val USER_PREFIX = "user"
 const val MODEL_PREFIX = "model"
 
 interface UiState {
+    val id: String
     val messages: List<ChatMessage>
     val fullPrompt: String
+
 
     /**
      * Creates a new loading message.
@@ -34,7 +37,8 @@ interface UiState {
  * A sample implementation of [UiState] that can be used with any model.
  */
 class ChatUiState(
-    messages: List<ChatMessage> = emptyList()
+    messages: List<ChatMessage> = emptyList(),
+    override val id: String = UUID.randomUUID().toString()
 ) : UiState {
     private val _messages: MutableList<ChatMessage> = messages.toMutableStateList()
     override val messages: List<ChatMessage> = _messages.reversed()
@@ -76,7 +80,8 @@ class ChatUiState(
  * An implementation of [UiState] to be used with the Gemma model.
  */
 class GemmaUiState(
-    messages: List<ChatMessage> = emptyList()
+    messages: List<ChatMessage> = emptyList(),
+    override val id: String = UUID.randomUUID().toString()
 ) : UiState {
     private val START_TURN = "<start_of_turn>"
     private val END_TURN = "<end_of_turn>"

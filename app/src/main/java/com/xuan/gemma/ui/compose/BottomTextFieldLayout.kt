@@ -53,7 +53,7 @@ fun TextFieldLayout(
             //takeImageIcon=====
             FilledIconButton(
                 onClick = filledIconBtnOnClick,
-                enabled = textInputEnabled,
+                enabled = true,
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -84,7 +84,7 @@ fun TextFieldLayout(
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
             ),
-            enabled = textInputEnabled,
+            enabled = true,
             keyboardOptions = KeyboardOptions.Default,
             keyboardActions = KeyboardActions.Default,
             trailingIcon = {

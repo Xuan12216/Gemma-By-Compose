@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -38,9 +39,11 @@ import com.jvziyaoyao.scale.image.previewer.ImagePreviewer
 import com.jvziyaoyao.scale.zoomable.previewer.VerticalDragType
 import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import com.xuan.gemma.R
+import com.xuan.gemma.data.ChatMessage
 import com.xuan.gemma.data.rememberObject.rememberCoilImagePainter
 import com.xuan.gemma.data.rememberObject.rememberSettingState
 import com.xuan.gemma.data.stateObject.UiState
+import com.xuan.gemma.database.Message
 import com.xuan.gemma.model.ChatViewModel
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.BottomSheet
@@ -65,10 +68,30 @@ internal fun ChatRoute(
         factory = ChatViewModel.getFactory(LocalContext.current.applicationContext)
     ),
     active: Boolean,
-    onActiveChange: (Boolean) -> Unit
-) {
+    onActiveChange: (Boolean) -> Unit,
+    type: String,
+    selectedMessage: Message?,
+    onSelectedMessageClear: () -> Unit
+    ) {
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
+
+    selectedMessage?.let { message ->
+        chatViewModel.clearMessages()
+        val newMessages = message.messages.map { chat ->
+            ChatMessage(
+                message = chat.message,
+                uris = chat.uris,
+                author = chat.author
+            )
+        }
+
+        // 在修改完 _uiState.value.messages 后，再将消息插入到数据库
+        newMessages.reversed().forEach { chat ->
+            chatViewModel.addMessage(chat.message, chat.uris, chat.author)
+        }
+        onSelectedMessageClear()
+    }
 
     ChatScreen(
         pickImageFunc = pickImageFunc,
@@ -78,12 +101,13 @@ internal fun ChatRoute(
         drawerState = drawerState,
         uiState = uiState,
         textInputEnabled = textInputEnabled,
-        onSendMessage = { message, imageUris ->
-            chatViewModel.sendMessage(message, imageUris)
+        onSendMessage = { id, message, imageUris ->
+            chatViewModel.sendMessage(id, type, message, imageUris)
         },
         onClearMessages = { chatViewModel.clearMessages() },
         active = active,
-        onActiveChange = onActiveChange
+        onActiveChange = onActiveChange,
+        chatViewModel = chatViewModel
     )
 }
 
@@ -97,27 +121,21 @@ fun ChatScreen(
     drawerState: DrawerState,
     uiState: UiState,
     textInputEnabled: Boolean = true,
-    onSendMessage: (String, List<Uri>) -> Unit,
+    onSendMessage: (String, String, List<Uri>) -> Unit,
     onClearMessages: () -> Unit,
     active: Boolean,
-    onActiveChange: (Boolean) -> Unit
+    onActiveChange: (Boolean) -> Unit,
+    chatViewModel: ChatViewModel
 ) {
-    var userMessage by rememberSaveable { mutableStateOf("") }
     //state============================================================================
+    val userMessage by chatViewModel.userMessage.collectAsState()
+    val tempImageUriList by chatViewModel.tempImageUriList.collectAsState()//圖片
+    val deleteUriList by chatViewModel.deleteUriList.collectAsState()//需要刪除的圖片
+    val filteredUriList by chatViewModel.filteredUriList.collectAsState()//過濾后的list
+    val flexItem by chatViewModel.flexItem.collectAsState()
+    val openBottomSheet by chatViewModel.openBottomSheet.collectAsState()
 
-    val tempImageUriList = remember { mutableStateListOf<Uri>() }//圖片
-    val deleteUriList = remember { mutableStateListOf<Uri>() }//需要刪除的圖片
-    val filteredUriList by remember { derivedStateOf { tempImageUriList - deleteUriList } }//過濾后的list
-    //flex=====
-    val flexboxItemArray = stringArrayResource(id = R.array.flexboxItem)
-    var flexItem by remember { mutableStateOf(emptyList<String>()) }
-    if (flexItem.isEmpty()) {
-        val randomIndices = flexboxItemArray.indices.shuffled().take(5)
-        val randomItems = randomIndices.map { flexboxItemArray[it] }
-        flexItem = randomItems
-    }
     //bottomSheet=====
-    val openBottomSheet = rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     val options: List<Triple<Painter, String, Int>> = listOf(
         Triple(painterResource(id = R.drawable.baseline_camera_alt_24), stringResource(id = R.string.useCameraPickImage), 1),
@@ -154,6 +172,7 @@ fun ChatScreen(
             previewerState.close()
         }
     }
+
     //backHandler=====
     val backHandlerEnabled = drawerState.isOpen || previewerState.canClose || previewerState.animating || active
 
@@ -174,7 +193,9 @@ fun ChatScreen(
 
     //=================================================================================
 
-    Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)) {
         //AppBar=====
         AppBar(
             textInputEnabled = textInputEnabled,
@@ -186,9 +207,7 @@ fun ChatScreen(
             iconBtn2Content = "Add New Chat",
             iconBtn2Onclick = {
                 //refresh FlexItem
-                val randomIndices = flexboxItemArray.indices.shuffled().take(5)
-                val randomItems = randomIndices.map { flexboxItemArray[it] }
-                flexItem = randomItems
+                chatViewModel.refreshFlexItems()
 
                 //clear messages
                 onClearMessages()
@@ -226,23 +245,22 @@ fun ChatScreen(
             FlexLazyRow(
                 flexItem = flexItem,
                 hapticFeedback = hapticFeedback,
-                onItemClick = { userMessage = it }
+                onItemClick = { chatViewModel.updateUserMessage(it) }
             )
         }
 
         //pickImage Func and textField
         TextFieldLayout(
             textInputEnabled = textInputEnabled,
-            filledIconBtnOnClick = { scope.launch { openBottomSheet.value = true }},
-            filledIconPainter = painterResource(id = R.drawable.baseline_image_24),
+            filledIconBtnOnClick = { scope.launch { chatViewModel.toggleBottomSheet(true) }},
+            filledIconPainter = painterResource(id = R.drawable.baseline_add_24),
             filledIconContent = "Insert Image",
             textFieldText = userMessage,
-            onTextFieldChange = { userMessage = it },
+            onTextFieldChange = { chatViewModel.updateUserMessage(it) },
             onTextFieldAdd = {
-                onSendMessage(userMessage, filteredUriList)
-                userMessage = ""
-                tempImageUriList.clear()
-                deleteUriList.clear()
+                onSendMessage(uiState.id, userMessage, filteredUriList)
+                chatViewModel.updateUserMessage("")
+                chatViewModel.clearTempAndDeleteUriLists()
             },
             textFieldHint = stringResource(id = R.string.EditText_hint),
             recordFunc = recordFunc,
@@ -266,7 +284,7 @@ fun ChatScreen(
                     else previewerState.open(it)
                 }
             },
-            onDelete = { deleteUriList.add(it) },
+            onDelete = { chatViewModel.addDeleteUri(it); },
             previewerState = previewerState,
             isShowDelete = true
         )
@@ -284,19 +302,19 @@ fun ChatScreen(
     )
 
     //bottomSheet
-    if (openBottomSheet.value) {
+    if (openBottomSheet) {
         BottomSheet(
             bottomSheetState = bottomSheetState,
-            onDismiss = { openBottomSheet.value = false },
+            onDismiss = { chatViewModel.toggleBottomSheet(false) },
             options = options,
             pickImageFunc = pickImageFunc,
             pickImageUsingCamera = pickImageUsingCamera,
             onCallbackImageUri = {
                 scope.launch {
                     bottomSheetState.hide()
-                    openBottomSheet.value = false
+                    chatViewModel.toggleBottomSheet(false)
                 }
-                tempImageUriList.add(it)
+                chatViewModel.addTempImageUri(it)
             }
         )
     }

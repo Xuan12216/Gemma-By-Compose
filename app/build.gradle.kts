@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -38,9 +40,6 @@ android {
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -89,4 +88,13 @@ dependencies {
     implementation(libs.image.viewer)
     implementation(libs.sampling.decoder)
     implementation(libs.origeek.ui)
+
+    //room
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.rxjava2)
+    implementation(libs.room.ktx)
+
+    //gson
+    implementation(libs.gson)
 }
