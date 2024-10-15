@@ -11,9 +11,6 @@ import java.io.File
 class InferenceModel private constructor(private val context: Context) {
     private var llmInference: LlmInference
 
-    private val modelExists: Boolean
-        get() = File(context.cacheDir, MODEL_NAME).exists()
-
     private val _partialResults = MutableSharedFlow<Pair<String, Boolean>>(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -21,12 +18,11 @@ class InferenceModel private constructor(private val context: Context) {
     val partialResults: SharedFlow<Pair<String, Boolean>> = _partialResults.asSharedFlow()
 
     init {
-        if (!modelExists) {
-            throw IllegalArgumentException("Model not found at path: ${context.cacheDir}/$MODEL_NAME")
-        }
+        val modelFile = findModelFile(context.cacheDir)
+            ?: throw IllegalArgumentException("Model not found at path: ${context.cacheDir}/$MODEL_NAME")
 
         val options = LlmInference.LlmInferenceOptions.builder()
-            .setModelPath("${context.cacheDir}/$MODEL_NAME")
+            .setModelPath(modelFile.absolutePath) // 使用找到的文件路径
             .setMaxTokens(1024)
             .setResultListener { partialResult, done ->
                 _partialResults.tryEmit(partialResult to done)
@@ -41,14 +37,20 @@ class InferenceModel private constructor(private val context: Context) {
     }
 
     companion object {
-        private const val MODEL_NAME = "model.bin"
+        private const val MODEL_NAME = "model"
         private var instance: InferenceModel? = null
 
+        // 获取 InferenceModel 实例
         fun getInstance(context: Context): InferenceModel {
-            return if (instance != null) {
-                instance!!
-            } else {
-                InferenceModel(context).also { instance = it }
+            return instance ?: InferenceModel(context).also { instance = it }
+        }
+
+        // 遍历缓存目录，查找与指定文件名匹配的文件（不包括扩展名）
+        private fun findModelFile(directory: File): File? {
+            val files = directory.listFiles() ?: return null
+            return files.firstOrNull { file ->
+                val nameWithoutExtension = file.name.substringBeforeLast(".")
+                nameWithoutExtension == MODEL_NAME
             }
         }
     }

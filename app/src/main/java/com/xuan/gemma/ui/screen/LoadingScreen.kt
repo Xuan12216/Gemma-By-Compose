@@ -1,7 +1,6 @@
 package com.xuan.gemma.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,10 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.xuan.gemma.R
 import com.xuan.gemma.model.InferenceModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,7 +38,7 @@ internal fun LoadingRoute(
         )
     }
     else {
-        LoadingIndicator()
+        LoadingIndicator("Loading model")
     }
 
     LaunchedEffect(Unit, block = {
@@ -61,14 +58,14 @@ internal fun LoadingRoute(
 }
 
 @Composable
-fun LoadingIndicator() {
+fun LoadingIndicator(message: String) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Loading model",
+            text = message,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .padding(bottom = 8.dp)
@@ -82,9 +79,10 @@ fun ErrorMessage(
     errorMessage: String,
     onRetry: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = errorMessage,

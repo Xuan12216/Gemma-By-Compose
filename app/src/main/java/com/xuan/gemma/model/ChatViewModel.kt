@@ -14,14 +14,13 @@ import com.xuan.gemma.data.stateObject.USER_PREFIX
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.database.MessageRepository
+import com.xuan.gemma.util.AppUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectIndexed
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ChatViewModel(
     private val inferenceModel: InferenceModel,
@@ -153,14 +152,15 @@ class ChatViewModel(
                 id = id,
                 messages = chatMessage,
                 title = chatMessage.last().message,
-                type = type
+                type = type,
+                date = AppUtils.getCurrentDateTime()
             )
             repository.insertOrUpdateMessage(message)
         }
     }
 
-    fun clearMessages() {
-        _uiState.value = GemmaUiState() // or ChatUiState() if you're using a different model
+    fun clearMessages(id: String = "") {
+        _uiState.value = GemmaUiState(newId = id) // or ChatUiState() if you're using a different model
     }
 
     private fun setInputEnabled(isEnabled: Boolean) {

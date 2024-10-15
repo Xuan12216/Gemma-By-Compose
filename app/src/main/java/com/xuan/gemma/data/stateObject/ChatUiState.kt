@@ -80,9 +80,10 @@ class ChatUiState(
  * An implementation of [UiState] to be used with the Gemma model.
  */
 class GemmaUiState(
+    newId: String = "",
     messages: List<ChatMessage> = emptyList(),
-    override val id: String = UUID.randomUUID().toString()
-) : UiState {
+    override val id: String = newId.ifEmpty { UUID.randomUUID().toString() }
+) : UiState{
     private val START_TURN = "<start_of_turn>"
     private val END_TURN = "<end_of_turn>"
 

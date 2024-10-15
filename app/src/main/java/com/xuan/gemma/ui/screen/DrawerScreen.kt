@@ -53,8 +53,10 @@ object MainFunc {
         var listHistory: List<Message> by remember { mutableStateOf(emptyList()) }
         var selectedMessage by remember { mutableStateOf<Message?>(null) }
 
-        LaunchedEffect(drawerState.currentValue) { if (!drawerState.isOpen) { active = false } }
-        LaunchedEffect(active) { listHistory = repository.getAllMessages() }
+        LaunchedEffect(drawerState.isOpen) {
+            if (!drawerState.isOpen) active = false
+            listHistory = repository.getAllMessages()
+        }
 
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -73,19 +75,14 @@ object MainFunc {
                         },
                         onSearchHistoryItemClicked = { selectedMessage = it },
                         listHistory = listHistory,
-                        onActiveChange = {
-                            active = it
-                            if (!active) { scope.launch { drawerState.close() } }
-                        }
+                        onActiveChange = { active = it }
                     )
                 }
             }
         ) {
             Scaffold { paddingValues ->
                 when (selectedItemIndex) {
-                    2 -> DrawerScreen("Urgent", drawerState, paddingValues)
-                    3 -> DrawerScreen("Settings", drawerState, paddingValues)
-                    else -> ChatRoute(
+                    0 -> ChatRoute(
                         drawerState = drawerState,
                         recordFunc = recordFunc,
                         pickImageFunc = pickImageFunc,
@@ -95,8 +92,15 @@ object MainFunc {
                         onActiveChange = { active = it },
                         type = items[selectedItemIndex].title,
                         selectedMessage = selectedMessage,
-                        onSelectedMessageClear = { selectedMessage = null }
+                        onSelectedMessageClear = {
+                            selectedMessage = null
+                            scope.launch { drawerState.close() }
+                        }
                     )
+                    1-> DrawerScreen("Gemini", drawerState, paddingValues)
+                    2 -> DrawerScreen("Urgent", drawerState, paddingValues)
+                    3 -> DrawerScreen("Settings", drawerState, paddingValues)
+                    else -> DrawerScreen("None", drawerState, paddingValues)
                 }
             }
         }
@@ -119,8 +123,10 @@ fun DrawerContent(
             end = if (active) 0.dp else 16.dp
         )
     ) {
-        if (!active) Header(items[selectedItemIndex].title)
+        //title and logo
+        if (!active) DrawerHeader(items[selectedItemIndex].title)
 
+        //history search
         SearchableHistoryList(
             listHistory = listHistory,
             onItemClicked = onSearchHistoryItemClicked,
@@ -131,6 +137,7 @@ fun DrawerContent(
         Spacer(modifier = Modifier.height(28.dp))
         HorizontalDivider(thickness = 2.dp)
 
+        //drawer item
         LazyColumn {
             itemsIndexed(items) { index, item ->
                 DrawerItem(
@@ -145,7 +152,7 @@ fun DrawerContent(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun Header(title: String) {
+fun DrawerHeader(title: String) {
     Row(
         modifier = Modifier.padding(top = 20.dp, bottom = 8.dp, start = 4.dp)
     ) {

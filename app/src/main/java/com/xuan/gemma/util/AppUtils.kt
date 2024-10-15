@@ -6,6 +6,9 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object AppUtils {
     fun registerPickFileLauncher(
@@ -22,8 +25,9 @@ object AppUtils {
         }
     }
 
-    fun handleSelectedFile(uri: Uri, activity: ComponentActivity, pickFileLauncher: ActivityResultLauncher<Intent>) {
-        val fileManagerHelper = FileManagerHelper(activity, pickFileLauncher)
-        fileManagerHelper.handleSelectedFile(uri)
+    fun getCurrentDateTime(): String {
+        val dateFormat = SimpleDateFormat("yyyyMMdd HH:mm", Locale.getDefault())
+        val date = Date()
+        return dateFormat.format(date)
     }
 }
