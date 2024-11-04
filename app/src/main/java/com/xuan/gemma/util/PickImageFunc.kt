@@ -6,20 +6,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 
-class PickImageFunc(activity: ComponentActivity, context: Context) {
+class PickImageFunc {
     private var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>? = null
-    private val imageResize: ImageResize = ImageResize(context)
+    private lateinit var imageResize: ImageResize
     private var callback: OnImageResultCallback? = null
 
-    init {
-        activity.lifecycle.addObserver(LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_CREATE) {
-                pickMedia = activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia(), this::saveImage)
-            }
-        })
+    fun init(activity: ComponentActivity,context: Context) {
+        imageResize = ImageResize(context)
+        pickMedia = activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia(), this::saveImage)
     }
 
     fun startPickImage(callback: OnImageResultCallback) {

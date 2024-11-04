@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,10 +22,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.xuan.gemma.util.PickImageFunc
-import com.xuan.gemma.util.PickImageUsingCamera
+import com.xuan.gemma.activity.LocalMainViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 fun BottomSheet(
     bottomSheetState: SheetState,
     onDismiss: () -> Unit,
-    options: List<Triple<Painter, String, Int>>,
-    pickImageFunc: PickImageFunc,
-    pickImageUsingCamera: PickImageUsingCamera,
+    options: List<Triple<Int, String, Int>>,
     onCallbackImageUri: (Uri) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val pickImageFunc = LocalMainViewModel.current.pickImage
+    val pickImageUsingCamera = LocalMainViewModel.current.pickImageUsingCamera
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -48,7 +48,7 @@ fun BottomSheet(
         content = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
 
             ) {
                 options.forEach { option ->
@@ -58,11 +58,10 @@ fun BottomSheet(
                             .align(Alignment.CenterHorizontally)
                             .clickable {
                                 if (option.third == 1) {
-                                    pickImageUsingCamera.startPickImage{ compressedUri ->
+                                    pickImageUsingCamera.startPickImage { compressedUri ->
                                         onCallbackImageUri(compressedUri)
                                     }
-                                }
-                                else if (option.third == 2) {
+                                } else if (option.third == 2) {
                                     pickImageFunc.startPickImage { compressedUri ->
                                         onCallbackImageUri(compressedUri)
                                     }
@@ -80,7 +79,7 @@ fun BottomSheet(
                                 .height(30.dp)
                         ) {
                             Icon(
-                                painter = option.first,
+                                painter = painterResource(id = option.first),
                                 contentDescription = null,
                                 modifier = Modifier
                                     .width(18.dp)
@@ -94,7 +93,6 @@ fun BottomSheet(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.padding(bottom = 85.dp))
             }
         },
         scrimColor = Color.Black.copy(alpha = 0.6f)

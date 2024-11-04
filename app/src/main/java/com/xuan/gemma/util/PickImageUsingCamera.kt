@@ -14,20 +14,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class PickImageUsingCamera(activity: ComponentActivity, private val context: Context) {
-    private val imageResize: ImageResize = ImageResize(context)
+class PickImageUsingCamera() {
+    private lateinit var imageResize: ImageResize
     private var takePicture: ActivityResultLauncher<Uri>? = null
     private var callback: OnImageResultCallback? = null
     private var photoUri: Uri? = null
+    private lateinit var context: Context
 
-    init {
-        activity.lifecycle.addObserver(LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_CREATE) {
-                takePicture = activity.registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-                    saveTakenImage(success)
-                }
-            }
-        })
+    fun init(activity: ComponentActivity, context: Context) {
+        this.context = context
+        imageResize = ImageResize(context)
+        takePicture = activity.registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            saveTakenImage(success)
+        }
     }
 
     fun startPickImage(callback: OnImageResultCallback) {

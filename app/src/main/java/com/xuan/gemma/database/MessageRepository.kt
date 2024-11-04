@@ -26,4 +26,10 @@ class MessageRepository(context: Context) {
             messageDao.getAllMessages()
         }
     }
+
+    suspend fun deleteMessage(message: Message) {
+        return withContext(Dispatchers.IO) {
+            messageDao.deleteMessageById(message.id)
+        }
+    }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jvziyaoyao.scale.image.previewer.ImagePreviewer
@@ -35,7 +36,6 @@ import com.xuan.gemma.data.rememberObject.rememberCoilImagePainter
 import com.xuan.gemma.data.rememberObject.rememberSettingState
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
-import com.xuan.gemma.viewmodel.ChatViewModel
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.BottomSheet
 import com.xuan.gemma.ui.compose.ChatItem
@@ -43,24 +43,33 @@ import com.xuan.gemma.ui.compose.TextFieldLayout
 import com.xuan.gemma.ui.compose.WelcomeLayout
 import com.xuan.gemma.ui.lazyList.FlexLazyRow
 import com.xuan.gemma.ui.lazyList.TransformImageLazyList
+import com.xuan.gemma.viewmodel.GeminiViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun ChatRoute(
+fun GeminiLayout (
     paddingValues: PaddingValues,
     drawerState: DrawerState,
-    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory(LocalContext.current.applicationContext)),
+    viewModel: GeminiViewModel = viewModel(factory = GeminiViewModel.getFactory(LocalContext.current.applicationContext)),
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
     type: String,
     selectedMessage: Message?,
     onSelectedMessageClear: () -> Unit
-    ) {
-    val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
-    val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val textInputEnabled by viewModel.isTextInputEnabled.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.generativeModelManager.checkApiKey(context)
+        viewModel.generativeModelManager.initializeGenerativeModel(context)
+    }
 
     selectedMessage?.let { message ->
-        chatViewModel.clearMessages(message.id)
+        viewModel.clearMessages(message.id)
         val newMessages = message.messages.map { chat ->
             ChatMessage(
                 message = chat.message,
@@ -70,28 +79,26 @@ internal fun ChatRoute(
         }
 
         // 在修改完 _uiState.value.messages 后，再将消息插入到数据库
-        newMessages.reversed().forEach { chat ->
-            chatViewModel.addMessage(chat.message, chat.uris, chat.author)
-        }
+        newMessages.reversed().forEach { viewModel.addMessage(it.message, it.uris, it.author) }
         onSelectedMessageClear()
     }
 
-    ChatScreen(
+    GeminiChatScreen(
         paddingValues = paddingValues,
         drawerState = drawerState,
         uiState = uiState,
         textInputEnabled = textInputEnabled,
-        onSendMessage = { id, message, imageUris -> chatViewModel.sendMessage(id, type, message, imageUris) },
-        onClearMessages = { chatViewModel.clearMessages() },
+        onSendMessage = { id, message, imageUris -> viewModel.sendMessage(id, type, message, imageUris, lifecycleOwner.lifecycle) },
+        onClearMessages = { viewModel.clearMessages() },
         active = active,
         onActiveChange = onActiveChange,
-        chatViewModel = chatViewModel
+        viewModel = viewModel
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(
+fun GeminiChatScreen(
     paddingValues: PaddingValues,
     drawerState: DrawerState,
     uiState: UiState,
@@ -100,7 +107,7 @@ fun ChatScreen(
     onClearMessages: () -> Unit,
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
-    chatViewModel: ChatViewModel
+    viewModel: GeminiViewModel
 ) {
     //bottomSheet=====
     val bottomSheetState = rememberModalBottomSheetState()
@@ -113,7 +120,7 @@ fun ChatScreen(
         scope = scope,
         defaultAnimationSpec = tween(settingState.animationDuration),
         verticalDragType = VerticalDragType.Down,
-        pageCount = { chatViewModel.filteredUriList.size },
+        pageCount = { viewModel.filteredUriList.size },
         getKey = { it },
     )
 
@@ -129,8 +136,8 @@ fun ChatScreen(
         }
     }
 
-    LaunchedEffect(chatViewModel.filteredUriList.size) {
-        if (chatViewModel.filteredUriList.isEmpty() && (previewerState.canClose || previewerState.animating)) {
+    LaunchedEffect(viewModel.filteredUriList.size) {
+        if (viewModel.filteredUriList.isEmpty() && (previewerState.canClose || previewerState.animating)) {
             previewerState.close()
         }
     }
@@ -149,7 +156,7 @@ fun ChatScreen(
                         else previewerState.close()
                     }
                     uiState.messages.isNotEmpty() -> {
-                        chatViewModel.refreshFlexItems()
+                        viewModel.refreshFlexItems()
                         onClearMessages()
                     }
                 }
@@ -173,7 +180,7 @@ fun ChatScreen(
                     scope.launch { drawerState.open() }
                 }
                 else {
-                    chatViewModel.refreshFlexItems()
+                    viewModel.refreshFlexItems()
                     onClearMessages()
                 }
             },
@@ -211,23 +218,23 @@ fun ChatScreen(
         //flexItemList
         if (uiState.messages.isEmpty()) {
             FlexLazyRow(
-                flexItem = chatViewModel.flexItem,
-                onItemClick = { chatViewModel.updateUserMessage(it) }
+                flexItem = viewModel.flexItem,
+                onItemClick = { viewModel.updateUserMessage(it) }
             )
         }
 
         //pickImage Func and textField
         TextFieldLayout(
             textInputEnabled = textInputEnabled,
-            filledIconBtnOnClick = { scope.launch { chatViewModel.toggleBottomSheet(true) }},
+            filledIconBtnOnClick = { scope.launch { viewModel.toggleBottomSheet(true) }},
             filledIconPainter = painterResource(id = R.drawable.baseline_add_24),
             filledIconContent = "Insert Image",
-            textFieldText = chatViewModel.userMessage,
-            onTextFieldChange = { chatViewModel.updateUserMessage(it) },
+            textFieldText = viewModel.userMessage,
+            onTextFieldChange = { viewModel.updateUserMessage(it) },
             onTextFieldAdd = {
-                onSendMessage(uiState.id, chatViewModel.userMessage, chatViewModel.filteredUriList)
-                chatViewModel.updateUserMessage("")
-                chatViewModel.clearTempAndDeleteUriLists()
+                onSendMessage(uiState.id, viewModel.userMessage, viewModel.filteredUriList)
+                viewModel.updateUserMessage("")
+                viewModel.clearTempAndDeleteUriLists()
             },
             textFieldHint = stringResource(id = R.string.EditText_hint),
             recordFunc = LocalMainViewModel.current.recordFunc,
@@ -242,16 +249,16 @@ fun ChatScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp, bottom = 8.dp),
-            tempImageUriList = chatViewModel.tempImageUriList,
-            filteredUriList = chatViewModel.filteredUriList,
-            deleteUriList = chatViewModel.deleteUriList,
+            tempImageUriList = viewModel.tempImageUriList,
+            filteredUriList = viewModel.filteredUriList,
+            deleteUriList = viewModel.deleteUriList,
             onClick = {
                 scope.launch {
                     if (settingState.transformEnter) previewerState.enterTransform(it)
                     else previewerState.open(it)
                 }
             },
-            onDelete = { chatViewModel.addDeleteUri(it); },
+            onDelete = { viewModel.addDeleteUri(it); },
             previewerState = previewerState,
             isShowDelete = true
         )
@@ -262,24 +269,24 @@ fun ChatScreen(
         state = previewerState,
         imageLoader = { index ->
             val painter = if (settingState.loaderError && (index % 2 == 0)) null
-            else rememberCoilImagePainter(image = chatViewModel.filteredUriList[index])
+            else rememberCoilImagePainter(image = viewModel.filteredUriList[index])
 
             return@ImagePreviewer Pair(painter, painter?.intrinsicSize)
         }
     )
 
     //bottomSheet
-    if (chatViewModel.openBottomSheet) {
+    if (viewModel.openBottomSheet) {
         BottomSheet(
             bottomSheetState = bottomSheetState,
-            onDismiss = { chatViewModel.toggleBottomSheet(false) },
-            options = chatViewModel.options,
+            onDismiss = { viewModel.toggleBottomSheet(false) },
+            options = viewModel.options,
             onCallbackImageUri = {
                 scope.launch {
                     bottomSheetState.hide()
-                    chatViewModel.toggleBottomSheet(false)
+                    viewModel.toggleBottomSheet(false)
                 }
-                chatViewModel.addTempImageUri(it)
+                viewModel.addTempImageUri(it)
             }
         )
     }

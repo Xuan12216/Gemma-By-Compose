@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.xuan.gemma.data.ChatMessage
 import com.xuan.gemma.util.converters.Converters
-import java.sql.Date
 
 @Entity(tableName = "messages")
 @TypeConverters(Converters::class)
@@ -14,5 +13,6 @@ data class Message(
     val messages: List<ChatMessage>,
     val title: String,
     val type: String,
-    val date: String
+    val date: String,
+    val isPinned: Boolean
 )

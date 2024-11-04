@@ -3,6 +3,8 @@ package com.xuan.gemma.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerState
@@ -18,27 +20,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xuan.gemma.ui.screen.LoadingIndicator
 import com.xuan.gemma.ui.screen.LoadingRoute
-import com.xuan.gemma.ui.screen.MainFunc
 import com.xuan.gemma.ui.screen.ModelNotFoundScreen
+import com.xuan.gemma.ui.screen.MyDrawerLayout
 import com.xuan.gemma.ui.theme.GemmaTheme
-import com.xuan.gemma.util.FileManagerHelper
-import com.xuan.gemma.util.PickImageFunc
-import com.xuan.gemma.util.PickImageUsingCamera
-import com.xuan.gemma.util.RecordFunc
+import com.xuan.gemma.viewmodel.MainViewModel
 
 const val START_SCREEN = "start_screen"
 const val CHAT_SCREEN = "chat_screen"
 
+val LocalMainViewModel = compositionLocalOf<MainViewModel> { error("MainViewModel not provided") }
+
 class MainActivity : ComponentActivity() {
 
-    private lateinit var fileManagerHelper: FileManagerHelper
+    private val viewModel: MainViewModel by viewModels { MainViewModel.getFactory() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        fileManagerHelper = FileManagerHelper(this).apply { initPickFileLauncher() }
-        val pickImage = PickImageFunc(this, this)
-        val pckImgUseCam = PickImageUsingCamera(this, this)
+        viewModel.init(this, this)
 
         setContent {
             GemmaTheme {
@@ -48,22 +48,22 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                    val recordFunc = remember { RecordFunc(this, this) }
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when {
-                            fileManagerHelper.isLoading.value -> LoadingIndicator(message = "Saving Model to Device...")
-                            !fileManagerHelper.checkFileExists("model") -> ModelNotFoundScreen(
-                                fileManagerHelper = fileManagerHelper,
-                                onRefresh = { fileManagerHelper.openFileManager() }
-                            )
-                            else -> AppNavHost(
-                                navController = navController,
-                                drawerState = drawerState,
-                                recordFunc = recordFunc,
-                                pickImage = pickImage,
-                                pickImageUsingCamera = pckImgUseCam
-                            )
+                    CompositionLocalProvider(
+                        LocalMainViewModel provides viewModel
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when {
+                                viewModel.fileManagerHelper.isLoading.value -> LoadingIndicator(message = "Saving Model to Device...")
+                                !viewModel.fileManagerHelper.checkFileExists("model") -> ModelNotFoundScreen(
+                                    fileManagerHelper = viewModel.fileManagerHelper,
+                                    onRefresh = { viewModel.fileManagerHelper.openFileManager() }
+                                )
+                                else -> AppNavHost(
+                                    navController = navController,
+                                    drawerState = drawerState,
+                                )
+                            }
                         }
                     }
                 }
@@ -75,9 +75,6 @@ class MainActivity : ComponentActivity() {
     fun AppNavHost(
         navController: NavHostController,
         drawerState: DrawerState,
-        recordFunc: RecordFunc,
-        pickImage: PickImageFunc,
-        pickImageUsingCamera: PickImageUsingCamera
     ) {
         NavHost(
             navController = navController,
@@ -91,12 +88,12 @@ class MainActivity : ComponentActivity() {
                             launchSingleTop = true
                         }
                     },
-                    onRetry = {fileManagerHelper.openFileManager()}
+                    onRetry = {viewModel.fileManagerHelper.openFileManager()}
                 )
             }
 
             composable(CHAT_SCREEN) {
-                MainFunc.MyDrawerLayout(drawerState, recordFunc, pickImage, pickImageUsingCamera)
+                MyDrawerLayout(drawerState)
             }
         }
     }

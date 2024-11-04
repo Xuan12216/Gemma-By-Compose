@@ -6,24 +6,35 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.xuan.gemma.R
 import com.xuan.gemma.database.Message
 
 data class DropDownItem(
@@ -35,26 +46,26 @@ fun HistoryItem(
     message: Message,
     dropdownItems: List<DropDownItem>,
     onItemClick: (Message) -> Unit,
-    onItemLongClick: (DropDownItem) -> Unit
+    onItemLongClick: (DropDownItem, Message) -> Unit,
+    showDate: Boolean
 ) {
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(false)
+    var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var itemHeight by remember { mutableStateOf(0.dp) }
+    val interactionSource = remember { MutableInteractionSource() }
+
+    if (showDate) {
+        Text(
+            text = message.date.substring(0, 10), // Display only "yyyy/MM/dd"
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp),
+            fontSize = 12.sp
+        )
     }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-    val density = LocalDensity.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .onSizeChanged { itemHeight = with(density) { it.height.toDp() } },
+            .padding(start = 16.dp, end = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Box(
@@ -67,18 +78,47 @@ fun HistoryItem(
                             isContextMenuVisible = true
                             pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
                         },
-                        onPress = {
-                            val press = PressInteraction.Press(it)
+                        onPress = { pressPos ->
+                            val press = PressInteraction.Press(pressPos)
                             interactionSource.emit(press)
                             tryAwaitRelease()
                             interactionSource.emit(PressInteraction.Release(press))
-                            if (!isContextMenuVisible) onItemClick(message)
-                        }
+                        },
+                        onTap = { if (!isContextMenuVisible) onItemClick(message) }
                     )
                 }
-                .padding(16.dp)
+                .padding(top = 16.dp, bottom = 16.dp)
         ) {
-            Text(text = message.title)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilledIconButton(
+                    onClick = {},
+                    enabled = true,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 5.dp)
+                        .width(30.dp)
+                        .height(30.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = when {
+                            message.isPinned -> R.drawable.baseline_push_pin_24
+                            else -> R.drawable.chat_bubble_24px
+                        }),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                Text(
+                    text = message.title,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         DropdownMenu(
             expanded = isContextMenuVisible,
@@ -93,7 +133,7 @@ fun HistoryItem(
                 DropdownMenuItem(
                     text = { Text(text = it.text,) },
                     onClick = {
-                        onItemLongClick(it)
+                        onItemLongClick(it, message)
                         isContextMenuVisible = false
                     }
                 )

@@ -1,12 +1,17 @@
 package com.xuan.gemma.ui.compose
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,9 +23,9 @@ fun AppBar(
     iconBtn1Painter: Painter,
     iconBtn1Content: String,
     animatedText: String,
-    iconBtn2Onclick: () ->Unit,
-    iconBtn2Painter: Painter,
-    iconBtn2Content: String
+    iconBtn2Onclick: (() ->Unit)? = null,
+    iconBtn2Painter: Painter? = null,
+    iconBtn2Content: String = ""
 ) {
     Row {
         IconButton(
@@ -46,16 +51,27 @@ fun AppBar(
             15.sp
         )
 
-        IconButton(
-            onClick = iconBtn2Onclick,
-            enabled = textInputEnabled,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(5.dp)
-        ) {
-            Icon(
-                painter = iconBtn2Painter,
-                contentDescription = iconBtn2Content
+        if (null != iconBtn2Painter && null != iconBtn2Onclick) {
+            IconButton(
+                onClick = iconBtn2Onclick,
+                enabled = textInputEnabled,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(5.dp)
+            ) {
+                Icon(
+                    painter = iconBtn2Painter,
+                    contentDescription = iconBtn2Content
+                )
+            }
+        }
+        else {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(16.dp)
+                    .size(24.dp)
+                    .background(color = Color.Transparent)
             )
         }
     }

@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.xuan.gemma.R
 import com.xuan.gemma.database.Message
+import com.xuan.gemma.`object`.Constant
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +27,8 @@ fun SearchableHistoryList(
     listHistory: List<Message>,
     onItemClicked: (Message) -> Unit,
     active: Boolean,
-    onActiveChange: (Boolean) -> Unit
+    onActiveChange: (Boolean) -> Unit,
+    onItemLongClick: (DropDownItem, Message) -> Unit
 ) {
     var text by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -57,28 +60,40 @@ fun SearchableHistoryList(
                     Icon(imageVector = Icons.Default.Clear, contentDescription = null)
                 }
             }
-       },
+        },
         modifier = Modifier.fillMaxWidth(),
-    ) {
-        if (active) {
+    ){
+        var previousDate = ""
+        var isVisible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            delay(250L)
+            isVisible = true
+        }
+
+        if (isVisible) {
             LazyColumn {
-                itemsIndexed(filteredList) { _, item ->
+                itemsIndexed(filteredList) { index, item ->
+                    val currentDate = item.date.substring(0, 10) // Extract "yyyy/MM/dd"
+                    val showDate = if (index == 0) true else currentDate != previousDate
+                    previousDate = currentDate
+
                     HistoryItem(
                         message = item,
                         dropdownItems = listOf(
-                            DropDownItem("Item 1"),
-                            DropDownItem("Item 2"),
-                            DropDownItem("Item 3"),
+                            DropDownItem(Constant.PIN),
+                            DropDownItem(Constant.RENAME),
+                            DropDownItem(Constant.DELETE),
                         ),
                         onItemClick = { message ->
-                            println("TestXuan: "+message.title+": "+message.date)
                             onItemClicked(message)
                             scope.launch { onActiveChange(false) }
                             text = ""
                         },
-                        onItemLongClick = {
-                            println("TestXuan: "+it.text)
-                        }
+                        onItemLongClick = { dropDownItem, message ->
+                            onItemLongClick(dropDownItem, message)
+                        },
+                        showDate = showDate // Pass the flag to show date
                     )
                 }
             }

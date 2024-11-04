@@ -6,17 +6,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.xuan.gemma.ui.compose.FlexItem
 
 @Composable
 fun FlexLazyRow(
     flexItem: List<String>,
-    hapticFeedback: HapticFeedback,
     onItemClick: (String) -> Unit
 ) {
+    //hapticFeedback=====
+    val hapticFeedback = LocalHapticFeedback.current
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()

@@ -12,8 +12,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.xuan.gemma.R
 import java.util.Locale
 
-class RecordFunc(activity: ComponentActivity, private val context: Context) {
-    private val activityResultRegistry: ActivityResultRegistry = activity.activityResultRegistry
+class RecordFunc {
+    private lateinit var activityResultRegistry: ActivityResultRegistry
+    private lateinit var context: Context
+
+    fun init(activity: ComponentActivity, context: Context) {
+        activityResultRegistry = activity.activityResultRegistry
+        this.context = context
+    }
 
     fun startRecordFunc(callback: RecordResultCallback) {
         try {

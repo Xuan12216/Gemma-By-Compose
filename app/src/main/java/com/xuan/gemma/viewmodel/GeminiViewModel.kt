@@ -1,7 +1,12 @@
-package com.xuan.gemma.model
+package com.xuan.gemma.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,18 +19,16 @@ import com.xuan.gemma.data.stateObject.USER_PREFIX
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.database.MessageRepository
+import com.xuan.gemma.model.gemini.GeminiContentBuilder
+import com.xuan.gemma.model.gemini.GenerativeModelManager
 import com.xuan.gemma.util.AppUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 
-class ChatViewModel(
-    private val inferenceModel: InferenceModel,
-    private val appContext: Context
-) : ViewModel() {
+class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
     // `GemmaUiState()` is optimized for the Gemma model.
     // Replace `GemmaUiState` with `ChatUiState()` if you're using a different model
@@ -39,23 +42,22 @@ class ChatViewModel(
 
     //===========
 
-    private val _userMessage = MutableStateFlow("")
-    val userMessage: StateFlow<String> = _userMessage.asStateFlow()
+    var userMessage by mutableStateOf("")
 
-    private val _tempImageUriList = MutableStateFlow<MutableList<Uri>>(mutableListOf())
-    val tempImageUriList: StateFlow<List<Uri>> = _tempImageUriList.asStateFlow()
+    var tempImageUriList = mutableStateListOf<Uri>()
+    var deleteUriList = mutableStateListOf<Uri>()
+    var filteredUriList = mutableStateListOf<Uri>()
 
-    private val _deleteUriList = MutableStateFlow<MutableList<Uri>>(mutableListOf())
-    val deleteUriList: StateFlow<List<Uri>> = _deleteUriList.asStateFlow()
+    var flexItem = mutableStateListOf<String>()
 
-    private val _filteredUriList: MutableStateFlow<List<Uri>> = MutableStateFlow(emptyList())
-    val filteredUriList: StateFlow<List<Uri>> = _filteredUriList.asStateFlow()
+    var openBottomSheet by mutableStateOf(false)
 
-    private val _flexItem = MutableStateFlow<List<String>>(emptyList())
-    val flexItem: StateFlow<List<String>> = _flexItem.asStateFlow()
+    val options: List<Triple<Int, String, Int>> = listOf(
+        Triple(R.drawable.baseline_camera_alt_24, appContext.getString(R.string.useCameraPickImage), 1),
+        Triple(R.drawable.baseline_image_24, appContext.getString(R.string.useGalleryPickImage), 2)
+    )
 
-    private val _openBottomSheet = MutableStateFlow(false)
-    val openBottomSheet: StateFlow<Boolean> = _openBottomSheet.asStateFlow()
+    val generativeModelManager : GenerativeModelManager = GenerativeModelManager()
 
     //=====
 
@@ -64,76 +66,79 @@ class ChatViewModel(
     }
 
     fun updateUserMessage(message: String) {
-        _userMessage.value = message
+        userMessage = message
     }
 
     fun addTempImageUri(uri: Uri) {
-        _tempImageUriList.value.add(uri)
+        tempImageUriList.add(uri)
         updateFilteredUriList()
     }
 
     fun removeTempImageUri(uri: Uri) {
-        _tempImageUriList.value.remove(uri)
+        tempImageUriList.remove(uri)
     }
 
     fun addDeleteUri(uri: Uri) {
-        _deleteUriList.value.add(uri)
+        deleteUriList.add(uri)
         updateFilteredUriList()
     }
 
     fun removeDeleteUri(uri: Uri) {
-        _deleteUriList.value.remove(uri)
+        deleteUriList.remove(uri)
     }
 
     private fun updateFilteredUriList() {
-        val currentTempImageUriList = _tempImageUriList.value
-        val currentDeleteUriList = _deleteUriList.value
+        val currentTempImageUriList = tempImageUriList
+        val currentDeleteUriList = deleteUriList
 
-        _filteredUriList.value = currentTempImageUriList.filter { uri ->
-            !currentDeleteUriList.contains(uri)
-        }
+        filteredUriList.clear()
+        filteredUriList.addAll(
+            currentTempImageUriList.filter { uri ->
+                !currentDeleteUriList.contains(uri)
+            }
+        )
     }
 
     fun clearTempAndDeleteUriLists() {
-        _tempImageUriList.value.clear()
-        _deleteUriList.value.clear()
+        tempImageUriList.clear()
+        deleteUriList.clear()
     }
 
     fun toggleBottomSheet(show: Boolean) {
-        _openBottomSheet.value = show
+        openBottomSheet = show
     }
 
     fun refreshFlexItems() {
         val flexboxItemArray = appContext.resources.getStringArray(R.array.flexboxItem)
         val randomIndices = flexboxItemArray.indices.shuffled().take(5)
-        _flexItem.value = randomIndices.map { flexboxItemArray[it] }
+        flexItem.clear()
+        flexItem.addAll(randomIndices.map { flexboxItemArray[it] })
     }
 
     //==========
 
-    fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>) {
+    fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>, lifecycle: Lifecycle) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage,imageUris, USER_PREFIX)
             var currentMessageId: String? = _uiState.value.createLoadingMessage()
             setInputEnabled(false)
             try {
                 val fullPrompt = _uiState.value.fullPrompt
-                inferenceModel.generateResponseAsync(fullPrompt)
-                inferenceModel.partialResults
-                    .collectIndexed { index, (partialResult, done) ->
+                val contentBuilder = GeminiContentBuilder(imageUris, appContext, lifecycle, generativeModelManager)
+                contentBuilder.startGeminiBuilder(fullPrompt, imageUris.isNotEmpty(), object : GeminiContentBuilder.GeminiBuilderCallback {
+                    override fun callBackResult(text: String?, isFinish: Boolean) {
                         currentMessageId?.let {
-
-                            if (index == 0) _uiState.value.appendFirstMessage(it, partialResult)
-                            else _uiState.value.appendMessage(it, partialResult, done)
-
-                            if (done) {
+                            if (isFinish) {
+                                uiState.value.appendMessage(it, text ?: "", true)
                                 insertChatMessage(id, type, uiState.value.messages)
                                 currentMessageId = null
-                                // Re-enable text input
+                                filteredUriList.clear()
                                 setInputEnabled(true)
                             }
+                            else uiState.value.appendMessage(it, text ?: "", false)
                         }
                     }
+                })
             }
             catch (e: Exception) {
                 _uiState.value.addMessage(e.localizedMessage ?: "Unknown Error", emptyList(), MODEL_PREFIX)
@@ -153,7 +158,8 @@ class ChatViewModel(
                 messages = chatMessage,
                 title = chatMessage.last().message,
                 type = type,
-                date = AppUtils.getCurrentDateTime()
+                date = AppUtils.getCurrentDateTime(),
+                isPinned = false
             )
             repository.insertOrUpdateMessage(message)
         }
@@ -170,8 +176,7 @@ class ChatViewModel(
     companion object {
         fun getFactory(context: Context) = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val inferenceModel = InferenceModel.getInstance(context)
-                return ChatViewModel(inferenceModel, context) as T
+                return GeminiViewModel(context) as T
             }
         }
     }

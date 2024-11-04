@@ -1,15 +1,13 @@
 package com.xuan.gemma.ui.screen
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,91 +15,145 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.xuan.gemma.R
 import com.xuan.gemma.data.NavigationItem
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.database.MessageRepository
+import com.xuan.gemma.`object`.Constant
 import com.xuan.gemma.ui.compose.AppBar
+import com.xuan.gemma.ui.compose.DeleteMessageDialog
+import com.xuan.gemma.ui.compose.DropDownItem
+import com.xuan.gemma.ui.compose.RenameMessageDialog
 import com.xuan.gemma.ui.compose.SearchableHistoryList
-import com.xuan.gemma.util.PickImageFunc
-import com.xuan.gemma.util.PickImageUsingCamera
-import com.xuan.gemma.util.RecordFunc
+import com.xuan.gemma.viewmodel.DrawerViewModel
 import kotlinx.coroutines.launch
 
-object MainFunc {
+@Composable
+fun MyDrawerLayout(
+    drawerState: DrawerState,
+) {
+    val scope = rememberCoroutineScope()
+    val repository = MessageRepository(LocalContext.current)
+    val viewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.getFactory(repository))
 
-    private val items = listOf(
-        NavigationItem("Gemma", Icons.Filled.Home, Icons.Outlined.Home),
-        NavigationItem("Gemini", Icons.Filled.Star, Icons.TwoTone.Star),
-        NavigationItem("Urgent", Icons.Filled.Info, Icons.Outlined.Info),
-        NavigationItem("Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
-    )
+    // 控制抽屜打開/關閉時的邏輯
+    LaunchedEffect(drawerState.isOpen) {
+        if (!drawerState.isOpen) viewModel.active = false
+        viewModel.isRefreshListHistory = true
+    }
 
-    @Composable
-    fun MyDrawerLayout(
-        drawerState: DrawerState,
-        recordFunc: RecordFunc,
-        pickImageFunc: PickImageFunc,
-        pickImageUsingCamera: PickImageUsingCamera
-    ) {
-        val scope = rememberCoroutineScope()
-        var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
-        var active by remember { mutableStateOf(false) }
-        val repository = MessageRepository(LocalContext.current)
-        var listHistory: List<Message> by remember { mutableStateOf(emptyList()) }
-        var selectedMessage by remember { mutableStateOf<Message?>(null) }
+    // 刷新消息列表
+    LaunchedEffect(viewModel.isRefreshListHistory) {
+        if (viewModel.isRefreshListHistory) viewModel.refreshListHistory()
+    }
 
-        LaunchedEffect(drawerState.isOpen) {
-            if (!drawerState.isOpen) active = false
-            listHistory = repository.getAllMessages()
-        }
-
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            gesturesEnabled = drawerState.isOpen,
-            drawerContent = {
-                ModalDrawerSheet (
-                    modifier = Modifier.fillMaxWidth(0.85f)
-                ){
-                    DrawerContent(
-                        items = items,
-                        selectedItemIndex = selectedItemIndex,
-                        active = active,
-                        onItemClicked = { index ->
-                            selectedItemIndex = index
-                            scope.launch { drawerState.close() }
-                        },
-                        onSearchHistoryItemClicked = { selectedMessage = it },
-                        listHistory = listHistory,
-                        onActiveChange = { active = it }
-                    )
-                }
+    // 如果點擊重命名，顯示彈出框
+    if (viewModel.showRenameDialog && viewModel.renameMessage != null) {
+        RenameMessageDialog(
+            message = viewModel.renameMessage!!,
+            repository = repository,
+            onDismiss = {
+                viewModel.showRenameDialog = false
+                viewModel.isRefreshListHistory = true
             }
-        ) {
-            Scaffold { paddingValues ->
-                when (selectedItemIndex) {
-                    0 -> ChatRoute(
-                        drawerState = drawerState,
-                        recordFunc = recordFunc,
-                        pickImageFunc = pickImageFunc,
-                        pickImageUsingCamera = pickImageUsingCamera,
-                        paddingValues = paddingValues,
-                        active = active,
-                        onActiveChange = { active = it },
-                        type = items[selectedItemIndex].title,
-                        selectedMessage = selectedMessage,
-                        onSelectedMessageClear = {
-                            selectedMessage = null
-                            scope.launch { drawerState.close() }
+        )
+    }
+
+    if (viewModel.showDeleteDialog && viewModel.deleteMessage != null) {
+        DeleteMessageDialog(
+            message = viewModel.deleteMessage!!,
+            repository = repository,
+            onDismiss = {
+                viewModel.showDeleteDialog = false
+                viewModel.isRefreshListHistory = true
+            }
+        )
+    }
+
+    // 主體結構
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = drawerState.isOpen,
+        drawerContent = {
+
+            val animatedWidth by animateFloatAsState(
+                targetValue = if (viewModel.active) 1f else 0.75f,
+                animationSpec = tween(
+                    durationMillis = 250,
+                    delayMillis = 150,
+                    easing = LinearOutSlowInEasing
+                ),
+                label = "Drawer Width Animation"
+            )
+
+            ModalDrawerSheet(
+                modifier = Modifier.fillMaxWidth(animatedWidth)
+            ){
+                DrawerContent(
+                    items = viewModel.items,
+                    selectedItemIndex = viewModel.selectedItemIndex,
+                    active = viewModel.active,
+                    onItemClicked = { index ->
+                        viewModel.selectedItemIndex = index
+                        scope.launch { drawerState.close() }
+                    },
+                    onSearchHistoryItemClicked = { viewModel.selectedMessage = it },
+                    listHistory = viewModel.listHistory,
+                    onActiveChange = { viewModel.active = it },
+                    onItemLongClick = { dropDownItem, message ->
+                        when (dropDownItem.text) {
+                            Constant.PIN -> {
+                                scope.launch {
+                                    repository.insertOrUpdateMessage(message.copy(isPinned = !message.isPinned))
+                                    viewModel.isRefreshListHistory = true
+                                }
+                            }
+                            Constant.RENAME -> {
+                                viewModel.renameMessage = message
+                                viewModel.showRenameDialog = true
+                            }
+                            Constant.DELETE -> {
+                                viewModel.deleteMessage = message
+                                viewModel.showDeleteDialog = true
+                            }
                         }
-                    )
-                    1-> DrawerScreen("Gemini", drawerState, paddingValues)
-                    2 -> DrawerScreen("Urgent", drawerState, paddingValues)
-                    3 -> DrawerScreen("Settings", drawerState, paddingValues)
-                    else -> DrawerScreen("None", drawerState, paddingValues)
-                }
+                    }
+                )
+            }
+        }
+    ) {
+        Scaffold { paddingValues ->
+            when (viewModel.selectedItemIndex) {
+                0 -> ChatRoute(
+                    drawerState = drawerState,
+                    paddingValues = paddingValues,
+                    active = viewModel.active,
+                    onActiveChange = { viewModel.active = it },
+                    type = viewModel.items[viewModel.selectedItemIndex].title,
+                    selectedMessage = viewModel.selectedMessage,
+                    onSelectedMessageClear = {
+                        viewModel.selectedMessage = null
+                        scope.launch { drawerState.close() }
+                    }
+                )
+                1 -> GeminiLayout(
+                    drawerState = drawerState,
+                    paddingValues = paddingValues,
+                    active = viewModel.active,
+                    onActiveChange = { viewModel.active = it },
+                    type = viewModel.items[viewModel.selectedItemIndex].title,
+                    selectedMessage = viewModel.selectedMessage,
+                    onSelectedMessageClear = {
+                        viewModel.selectedMessage = null
+                        scope.launch { drawerState.close() }
+                    }
+                )
+                2 -> DrawerScreen("Urgent", drawerState, paddingValues)
+                3 -> DrawerScreen("Settings", drawerState, paddingValues)
+                else -> DrawerScreen("None", drawerState, paddingValues)
             }
         }
     }
@@ -115,7 +167,8 @@ fun DrawerContent(
     onItemClicked: (Int) -> Unit,
     onSearchHistoryItemClicked: (Message) -> Unit,
     listHistory: List<Message>,
-    onActiveChange: (Boolean) -> Unit
+    onActiveChange: (Boolean) -> Unit,
+    onItemLongClick: (DropDownItem, Message) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(
@@ -131,7 +184,10 @@ fun DrawerContent(
             listHistory = listHistory,
             onItemClicked = onSearchHistoryItemClicked,
             active = active,
-            onActiveChange = onActiveChange
+            onActiveChange = onActiveChange,
+            onItemLongClick = {  dropDownItem, message ->
+                onItemLongClick(dropDownItem, message)
+            }
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -209,9 +265,6 @@ fun DrawerScreen(
         iconBtn1Onclick = { scope.launch { drawerState.open() } },
         iconBtn1Painter = painterResource(id = R.drawable.baseline_menu_24),
         iconBtn1Content = "Open Drawer Navigation",
-        animatedText = "",
-        iconBtn2Painter = painterResource(id = R.drawable.baseline_add_comment_24),
-        iconBtn2Content = "Add New Chat",
-        iconBtn2Onclick = {}
+        animatedText = ""
     )
 }

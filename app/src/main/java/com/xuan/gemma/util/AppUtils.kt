@@ -26,7 +26,7 @@ object AppUtils {
     }
 
     fun getCurrentDateTime(): String {
-        val dateFormat = SimpleDateFormat("yyyyMMdd HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
         val date = Date()
         return dateFormat.format(date)
     }

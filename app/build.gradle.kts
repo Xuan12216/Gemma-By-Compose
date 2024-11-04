@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.xuan.gemma"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -98,4 +98,12 @@ dependencies {
 
     //gson
     implementation(libs.gson)
+
+    //activity
+    implementation(libs.activity)
+
+    //rxjava
+    implementation(libs.reactivex)
+    implementation(libs.uber.autodispose)
+    implementation(libs.autodispose.archcomponents)
 }
