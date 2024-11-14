@@ -47,7 +47,7 @@ fun MyDrawerLayout(
 
     // 刷新消息列表
     LaunchedEffect(viewModel.isRefreshListHistory) {
-        if (viewModel.isRefreshListHistory) viewModel.refreshListHistory()
+        if (viewModel.isRefreshListHistory) viewModel.refreshListHistory(viewModel.getType())
     }
 
     // 如果點擊重命名，顯示彈出框
@@ -132,7 +132,7 @@ fun MyDrawerLayout(
                     paddingValues = paddingValues,
                     active = viewModel.active,
                     onActiveChange = { viewModel.active = it },
-                    type = viewModel.items[viewModel.selectedItemIndex].title,
+                    type = viewModel.getType(),
                     selectedMessage = viewModel.selectedMessage,
                     onSelectedMessageClear = {
                         viewModel.selectedMessage = null
@@ -144,7 +144,7 @@ fun MyDrawerLayout(
                     paddingValues = paddingValues,
                     active = viewModel.active,
                     onActiveChange = { viewModel.active = it },
-                    type = viewModel.items[viewModel.selectedItemIndex].title,
+                    type = viewModel.getType(),
                     selectedMessage = viewModel.selectedMessage,
                     onSelectedMessageClear = {
                         viewModel.selectedMessage = null
@@ -171,10 +171,9 @@ fun DrawerContent(
     onItemLongClick: (DropDownItem, Message) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(
-            start = if (active) 0.dp else 16.dp,
-            end = if (active) 0.dp else 16.dp
-        )
+        modifier = Modifier
+            .padding(start = if (active) 0.dp else 16.dp, end = if (active) 0.dp else 16.dp)
+            .fillMaxSize()
     ) {
         //title and logo
         if (!active) DrawerHeader(items[selectedItemIndex].title)
@@ -190,8 +189,7 @@ fun DrawerContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
-        HorizontalDivider(thickness = 2.dp)
+        Spacer(modifier = Modifier.height(30.dp))
 
         //drawer item
         LazyColumn {

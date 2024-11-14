@@ -16,6 +16,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages ORDER BY isPinned DESC, date DESC")
     suspend fun getAllMessages(): List<Message>
 
+    @Query("SELECT * FROM messages WHERE type = :type ORDER BY isPinned DESC, date DESC")
+    suspend fun getMessagesByType(type: String): List<Message>
+
     @Query("DELETE FROM messages WHERE id = :id")
     suspend fun deleteMessageById(id: String)
 

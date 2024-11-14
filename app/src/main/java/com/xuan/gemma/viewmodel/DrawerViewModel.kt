@@ -34,12 +34,14 @@ class DrawerViewModel(private val repository: MessageRepository) : ViewModel() {
     val items = listOf(
         NavigationItem("Gemma", Icons.Filled.Home, Icons.Outlined.Home),
         NavigationItem("Gemini", Icons.Filled.Star, Icons.TwoTone.Star),
-        NavigationItem("Urgent", Icons.Filled.Info, Icons.Outlined.Info),
+        NavigationItem("Info", Icons.Filled.Info, Icons.Outlined.Info),
         NavigationItem("Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
     )
 
-    suspend fun refreshListHistory() {
-        listHistory = repository.getAllMessages()
+    fun getType (): String { return items[selectedItemIndex].title }
+
+    suspend fun refreshListHistory(type: String?) {
+        listHistory = repository.getAllMessages(type)
         isRefreshListHistory = false
     }
 

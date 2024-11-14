@@ -30,6 +30,10 @@ import kotlinx.coroutines.launch
 
 class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
+    // 使用 SnapshotStateList 存储消息
+    private val _displayMessages = mutableStateListOf<ChatMessage>()
+    val displayMessages: List<ChatMessage> = _displayMessages
+
     // `GemmaUiState()` is optimized for the Gemma model.
     // Replace `GemmaUiState` with `ChatUiState()` if you're using a different model
     private val _uiState: MutableStateFlow<GemmaUiState> = MutableStateFlow(GemmaUiState())
@@ -63,6 +67,11 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
     init {
         refreshFlexItems()
+    }
+
+    private fun updateDisplayMessages(messages: List<ChatMessage>) {
+        _displayMessages.clear()
+        _displayMessages.addAll(messages)
     }
 
     fun updateUserMessage(message: String) {
@@ -120,28 +129,39 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
     fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>, lifecycle: Lifecycle) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage,imageUris, USER_PREFIX)
+            updateDisplayMessages(_uiState.value.messages)
+
             var currentMessageId: String? = _uiState.value.createLoadingMessage()
+            updateDisplayMessages(_uiState.value.messages)
+
             setInputEnabled(false)
             try {
                 val fullPrompt = _uiState.value.fullPrompt
-                val contentBuilder = GeminiContentBuilder(imageUris, appContext, lifecycle, generativeModelManager)
-                contentBuilder.startGeminiBuilder(fullPrompt, imageUris.isNotEmpty(), object : GeminiContentBuilder.GeminiBuilderCallback {
+                val fullPromptUris = _uiState.value.fullPromptUris
+
+                val contentBuilder = GeminiContentBuilder(fullPromptUris, appContext, lifecycle, generativeModelManager)
+                contentBuilder.startGeminiBuilder(fullPrompt, fullPromptUris.isNotEmpty(), object : GeminiContentBuilder.GeminiBuilderCallback {
                     override fun callBackResult(text: String?, isFinish: Boolean) {
                         currentMessageId?.let {
                             if (isFinish) {
                                 uiState.value.appendMessage(it, text ?: "", true)
+                                updateDisplayMessages(_uiState.value.messages)
                                 insertChatMessage(id, type, uiState.value.messages)
                                 currentMessageId = null
                                 filteredUriList.clear()
                                 setInputEnabled(true)
                             }
-                            else uiState.value.appendMessage(it, text ?: "", false)
+                            else {
+                                uiState.value.appendMessage(it, text ?: "", false)
+                                updateDisplayMessages(_uiState.value.messages)
+                            }
                         }
                     }
                 })
             }
             catch (e: Exception) {
                 _uiState.value.addMessage(e.localizedMessage ?: "Unknown Error", emptyList(), MODEL_PREFIX)
+                updateDisplayMessages(_uiState.value.messages)
                 setInputEnabled(true)
             }
         }
@@ -149,6 +169,7 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
     fun addMessage(userMessage: String, imageUris: List<Uri>, userOrModel: String) {
         _uiState.value.addMessage(userMessage,imageUris, userOrModel)
+        updateDisplayMessages(_uiState.value.messages)
     }
 
     private fun insertChatMessage(id: String, type: String, chatMessage: List<ChatMessage>) {
@@ -167,6 +188,7 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
     fun clearMessages(id: String = "") {
         _uiState.value = GemmaUiState(newId = id) // or ChatUiState() if you're using a different model
+        _displayMessages.clear()
     }
 
     private fun setInputEnabled(isEnabled: Boolean) {

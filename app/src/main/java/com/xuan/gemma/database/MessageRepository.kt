@@ -21,9 +21,10 @@ class MessageRepository(context: Context) {
         }
     }
 
-    suspend fun getAllMessages(): List<Message> {
+    suspend fun getAllMessages(type: String?): List<Message> {
         return withContext(Dispatchers.IO) {
-            messageDao.getAllMessages()
+            if (type != null) messageDao.getMessagesByType(type)
+            else messageDao.getAllMessages()
         }
     }
 

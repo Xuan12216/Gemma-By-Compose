@@ -162,9 +162,11 @@ fun ChatScreen(
 
     //uiState.messages.isEmpty()
 
-    Column(modifier = Modifier
+    Column(
+        modifier = Modifier
         .fillMaxSize()
-        .padding(paddingValues)) {
+        .padding(paddingValues)
+    ) {
         //AppBar=====
         AppBar(
             textInputEnabled = textInputEnabled,
@@ -201,7 +203,7 @@ fun ChatScreen(
                     state = listState,
                     modifier = Modifier.weight(1f),
                 ) {
-                    items(uiState.messages.reversed()) { chat ->
+                    items(uiState.messages.reversed().toList()) { chat ->
                         ChatItem(chat)
                     }
                 }

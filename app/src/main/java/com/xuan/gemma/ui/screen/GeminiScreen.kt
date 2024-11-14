@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -63,9 +64,11 @@ fun GeminiLayout (
 
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        viewModel.generativeModelManager.checkApiKey(context)
-        viewModel.generativeModelManager.initializeGenerativeModel(context)
+    LaunchedEffect(lifecycleOwner.lifecycle.currentState) {
+        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
+            viewModel.generativeModelManager.checkApiKey(context)
+            viewModel.generativeModelManager.initializeGenerativeModel(context)
+        }
     }
 
     selectedMessage?.let { message ->
@@ -169,9 +172,11 @@ fun GeminiChatScreen(
 
     //uiState.messages.isEmpty()
 
-    Column(modifier = Modifier
+    Column(
+        modifier = Modifier
         .fillMaxSize()
-        .padding(paddingValues)) {
+        .padding(paddingValues)
+    ) {
         //AppBar=====
         AppBar(
             textInputEnabled = textInputEnabled,
@@ -208,8 +213,10 @@ fun GeminiChatScreen(
                     state = listState,
                     modifier = Modifier.weight(1f),
                 ) {
-                    items(uiState.messages.reversed()) { chat ->
-                        ChatItem(chat)
+                    if (viewModel.displayMessages.isNotEmpty()) {
+                        items(viewModel.displayMessages.reversed()) { chat ->
+                            ChatItem(chat)
+                        }
                     }
                 }
             }

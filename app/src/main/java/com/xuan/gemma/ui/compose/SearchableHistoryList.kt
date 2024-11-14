@@ -28,7 +28,7 @@ fun SearchableHistoryList(
     onItemClicked: (Message) -> Unit,
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
-    onItemLongClick: (DropDownItem, Message) -> Unit
+    onItemLongClick: (DropDownItem, Message) -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()

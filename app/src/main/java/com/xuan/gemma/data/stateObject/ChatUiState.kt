@@ -100,7 +100,10 @@ class GemmaUiState(
 
     // Only using the last 4 messages to keep input + output short
     override val fullPrompt: String
-        get() = _messages.takeLast(4).joinToString(separator = "\n") { it.message }
+        get() = _messages.takeLast(10).joinToString(separator = "\n") { it.message }
+
+    val fullPromptUris: List<Uri>
+        get() = _messages.takeLast(10).flatMap { it.uris }
 
     override fun createLoadingMessage(): String {
         val chatMessage = ChatMessage(author = MODEL_PREFIX, isLoading = true)
@@ -129,7 +132,7 @@ class GemmaUiState(
     override fun addMessage(text: String, imageUris: List<Uri>, author: String): String {
         val chatMessage = ChatMessage(
             message = "$START_TURN$author\n$text$END_TURN",
-            uris = imageUris,
+            uris = ArrayList(imageUris),
             author = author
         )
         _messages.add(chatMessage)
