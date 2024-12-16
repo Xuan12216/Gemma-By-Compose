@@ -23,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.jvziyaoyao.scale.image.previewer.ImagePreviewer
-import com.jvziyaoyao.scale.zoomable.pager.PagerGestureScope
-import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import com.xuan.gemma.data.ChatMessage
 import com.xuan.gemma.data.rememberObject.rememberCoilImagePainter
+import com.xuan.gemma.`object`.ImagePicker.pager.PagerGestureScope
+import com.xuan.gemma.`object`.ImagePicker.previewer.ImagePreviewer
+import com.xuan.gemma.`object`.ImagePicker.previewer.rememberPreviewerState
 import com.xuan.gemma.ui.lazyList.TransformImageLazyList
 import kotlinx.coroutines.launch
 

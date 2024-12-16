@@ -21,7 +21,6 @@ class UriTypeAdapter : JsonSerializer<Uri>, JsonDeserializer<Uri> {
             json.isJsonPrimitive -> Uri.parse(json.asString)
             json.isJsonObject -> {
                 val jsonObject = json.asJsonObject
-                println("TestXuan: $jsonObject")
                 if (jsonObject.has("uri")) {
                     Uri.parse(jsonObject.get("uri").asString)
                 }

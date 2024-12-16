@@ -25,9 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jvziyaoyao.scale.image.previewer.ImagePreviewer
-import com.jvziyaoyao.scale.zoomable.previewer.VerticalDragType
-import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
 import com.xuan.gemma.R
 import com.xuan.gemma.activity.LocalMainViewModel
 import com.xuan.gemma.data.ChatMessage
@@ -35,6 +32,9 @@ import com.xuan.gemma.data.rememberObject.rememberCoilImagePainter
 import com.xuan.gemma.data.rememberObject.rememberSettingState
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
+import com.xuan.gemma.`object`.ImagePicker.previewer.ImagePreviewer
+import com.xuan.gemma.`object`.ImagePicker.previewer.VerticalDragType
+import com.xuan.gemma.`object`.ImagePicker.previewer.rememberPreviewerState
 import com.xuan.gemma.viewmodel.ChatViewModel
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.BottomSheet
@@ -63,7 +63,7 @@ internal fun ChatRoute(
         chatViewModel.clearMessages(message.id)
         val newMessages = message.messages.map { chat ->
             ChatMessage(
-                message = chat.message,
+                rawMessage = chat.message,
                 uris = chat.uris,
                 author = chat.author
             )

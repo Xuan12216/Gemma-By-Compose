@@ -99,8 +99,9 @@ class GenerativeModelManager {
         configBuilder.topK = topK
         configBuilder.topP = topP
         configBuilder.maxOutputTokens = maxOutputToken
-        configBuilder.stopSequences = ArrayList(stopSequences)
         configBuilder.candidateCount = 1
+        if (!stp.isNullOrEmpty()) configBuilder.stopSequences = ArrayList(stopSequences)
+
         generationConfig = configBuilder.build()
     }
 

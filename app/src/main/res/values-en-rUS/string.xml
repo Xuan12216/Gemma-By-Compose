@@ -7,6 +7,7 @@
     <string name="what_is_api_key">What is an API: API keys are usually provided by the API provider and need to be set in the application. An application provides an API key when making a request to the API, which is used by the API provider to verify that the application has permission to access the API. This App must use API.</string>
     <string name="get_api_hint">Don’t have an API key? You can click here</string>
     <string name="editText_empty">Please enter API key</string>
+    <string name="please_ans_with_specified_language">Please Use English Answer: </string>
 
     <string-array name="settingsItem">
         <item>Set name, picture</item>

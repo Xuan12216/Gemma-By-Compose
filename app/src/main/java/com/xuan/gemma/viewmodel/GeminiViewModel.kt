@@ -136,8 +136,12 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
 
             setInputEnabled(false)
             try {
-                val fullPrompt = _uiState.value.fullPrompt
+                var fullPrompt = _uiState.value.fullPrompt
                 val fullPromptUris = _uiState.value.fullPromptUris
+
+                //使用系統語言進行回答, 目前支援英文和中文
+                val prefix = appContext.getString(R.string.please_ans_with_specified_language)
+                fullPrompt = "$prefix $fullPrompt<start_of_turn>model\n"
 
                 val contentBuilder = GeminiContentBuilder(fullPromptUris, appContext, lifecycle, generativeModelManager)
                 contentBuilder.startGeminiBuilder(fullPrompt, fullPromptUris.isNotEmpty(), object : GeminiContentBuilder.GeminiBuilderCallback {

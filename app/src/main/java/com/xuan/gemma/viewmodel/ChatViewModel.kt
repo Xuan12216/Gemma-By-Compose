@@ -128,7 +128,6 @@ class ChatViewModel(
                 inferenceModel.partialResults
                     .collectIndexed { index, (partialResult, done) ->
                         currentMessageId?.let {
-
                             if (index == 0) _uiState.value.appendFirstMessage(it, partialResult)
                             else _uiState.value.appendMessage(it, partialResult, done)
 

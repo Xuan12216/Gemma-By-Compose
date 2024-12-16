@@ -66,10 +66,7 @@ class SendToServer {
             single.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .`as`(AutoDispose.autoDisposable(AndroidLifecycleScopeProvider.from(lifecycle)))
-                .subscribe(
-                    { result ->  },
-                    { error -> error.printStackTrace() }
-                )
+                .subscribe({ }, { error -> error.printStackTrace() })
         }
     }
 

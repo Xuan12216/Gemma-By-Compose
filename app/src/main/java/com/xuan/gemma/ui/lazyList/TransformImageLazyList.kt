@@ -32,12 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.jvziyaoyao.scale.zoomable.previewer.PreviewerState
-import com.jvziyaoyao.scale.zoomable.previewer.TransformItemView
 import com.jvziyaoyao.scale.zoomable.previewer.rememberTransformItemState
 import com.origeek.ui.common.compose.DetectScaleGridGesture
 import com.origeek.ui.common.compose.ScaleGrid
 import com.xuan.gemma.R
+import com.xuan.gemma.`object`.ImagePicker.previewer.PreviewerState
+import com.xuan.gemma.`object`.ImagePicker.previewer.TransformItemView
 
 @Composable
 fun TransformImageLazyList(

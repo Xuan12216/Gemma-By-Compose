@@ -2,6 +2,7 @@ package com.xuan.gemma.model
 
 import android.content.Context
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
+import com.xuan.gemma.R
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,7 +24,7 @@ class InferenceModel private constructor(private val context: Context) {
 
         val options = LlmInference.LlmInferenceOptions.builder()
             .setModelPath(modelFile.absolutePath) // 使用找到的文件路径
-            .setMaxTokens(1024)
+            .setMaxTokens(2048)
             .setResultListener { partialResult, done ->
                 _partialResults.tryEmit(partialResult to done)
             }
@@ -33,7 +34,10 @@ class InferenceModel private constructor(private val context: Context) {
     }
 
     fun generateResponseAsync(prompt: String) {
-        llmInference.generateResponseAsync(prompt)
+        // Add the gemma prompt prefix to trigger the response.
+        val prefix = context.getString(R.string.please_ans_with_specified_language)
+        val gemmaPrompt = "$prefix $prompt<start_of_turn>model\n"
+        llmInference.generateResponseAsync(gemmaPrompt)
     }
 
     companion object {

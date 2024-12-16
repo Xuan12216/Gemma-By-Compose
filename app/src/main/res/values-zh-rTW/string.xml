@@ -7,6 +7,7 @@
     <string name="what_is_api_key">何謂API：API 金鑰通常由 API 提供者提供，並且需要在應用程式中設定。應用程式在向 API 發出請求時會提供 API 密鑰，API 提供者會使用該密鑰來驗證應用程式是否有權存取 API。本App必須使用API。</string>
     <string name="get_api_hint">沒有 API key ? 可以點 這裏</string>
     <string name="editText_empty">請輸入API key</string>
+    <string name="please_ans_with_specified_language">請使用繁體中文回答: </string>
 
     <string-array name="settingsItem">
         <item>設定名字，圖片</item>
