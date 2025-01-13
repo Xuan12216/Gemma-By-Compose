@@ -46,7 +46,7 @@ fun BottomSheet(
         content = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().padding(bottom = 50.dp)
             ) {
                 options.forEach { option ->
                     Row(

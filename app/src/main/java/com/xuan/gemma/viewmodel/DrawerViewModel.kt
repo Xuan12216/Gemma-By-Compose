@@ -1,5 +1,6 @@
 package com.xuan.gemma.viewmodel
 
+import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -20,7 +21,7 @@ import com.xuan.gemma.data.NavigationItem
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.database.MessageRepository
 
-class DrawerViewModel(private val repository: MessageRepository) : ViewModel() {
+class DrawerViewModel(context: Context) : ViewModel() {
     var selectedItemIndex by mutableIntStateOf(0)
     var active by mutableStateOf(false)
     var listHistory: List<Message> by mutableStateOf(emptyList())
@@ -30,6 +31,8 @@ class DrawerViewModel(private val repository: MessageRepository) : ViewModel() {
     var deleteMessage by mutableStateOf<Message?>(null)
     var showDeleteDialog by mutableStateOf(false)
     var isRefreshListHistory by mutableStateOf(false)
+
+    val repository = MessageRepository(context)
 
     val items = listOf(
         NavigationItem("Gemma", Icons.Filled.Home, Icons.Outlined.Home),
@@ -46,9 +49,9 @@ class DrawerViewModel(private val repository: MessageRepository) : ViewModel() {
     }
 
     companion object {
-        fun getFactory(repository: MessageRepository) = object : ViewModelProvider.Factory {
+        fun getFactory(context: Context) = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                return DrawerViewModel(repository) as T
+                return DrawerViewModel(context) as T
             }
         }
     }

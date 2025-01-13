@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.android.material)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -85,11 +86,6 @@ dependencies {
     implementation(libs.io.coil.kt)
     implementation(libs.io.coil.kt.coil.compose)
 
-    //imageViewer
-    implementation(libs.image.viewer)
-    implementation(libs.sampling.decoder)
-    implementation(libs.origeek.ui)
-
     //room
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
@@ -106,4 +102,7 @@ dependencies {
     implementation(libs.reactivex)
     implementation(libs.uber.autodispose)
     implementation(libs.autodispose.archcomponents)
+
+    //zoomable
+    implementation(libs.zoomable)
 }

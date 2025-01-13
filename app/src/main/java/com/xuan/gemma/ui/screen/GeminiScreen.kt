@@ -2,7 +2,6 @@ package com.xuan.gemma.ui.screen
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,20 +29,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xuan.gemma.R
 import com.xuan.gemma.activity.LocalMainViewModel
 import com.xuan.gemma.data.ChatMessage
-import com.xuan.gemma.data.rememberObject.rememberCoilImagePainter
-import com.xuan.gemma.data.rememberObject.rememberSettingState
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
-import com.xuan.gemma.`object`.ImagePicker.previewer.ImagePreviewer
-import com.xuan.gemma.`object`.ImagePicker.previewer.VerticalDragType
-import com.xuan.gemma.`object`.ImagePicker.previewer.rememberPreviewerState
+import com.xuan.gemma.ui.carousel.HorizontalCarousel
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.BottomSheet
 import com.xuan.gemma.ui.compose.ChatItem
 import com.xuan.gemma.ui.compose.TextFieldLayout
 import com.xuan.gemma.ui.compose.WelcomeLayout
 import com.xuan.gemma.ui.lazyList.FlexLazyRow
-import com.xuan.gemma.ui.lazyList.TransformImageLazyList
 import com.xuan.gemma.viewmodel.GeminiViewModel
 import kotlinx.coroutines.launch
 
@@ -117,16 +111,6 @@ fun GeminiChatScreen(
 
     //=====
     val scope = rememberCoroutineScope()
-    //=====
-    val settingState = rememberSettingState()
-    val previewerState = rememberPreviewerState(
-        scope = scope,
-        defaultAnimationSpec = tween(settingState.animationDuration),
-        verticalDragType = VerticalDragType.Down,
-        pageCount = { viewModel.filteredUriList.size },
-        getKey = { it },
-    )
-
     //status========================================================================
 
     // State for LazyList
@@ -139,25 +123,14 @@ fun GeminiChatScreen(
         }
     }
 
-    LaunchedEffect(viewModel.filteredUriList.size) {
-        if (viewModel.filteredUriList.isEmpty() && (previewerState.canClose || previewerState.animating)) {
-            previewerState.close()
-        }
-    }
-
     //backHandler=====
-    val backHandlerEnabled = drawerState.isOpen || previewerState.canClose ||
-            previewerState.animating || active || uiState.messages.isNotEmpty()
+    val backHandlerEnabled = drawerState.isOpen ||  active || uiState.messages.isNotEmpty()
 
     BackHandler(enabled = backHandlerEnabled) {
         scope.launch {
             if (!active) {
                 when {
                     drawerState.isOpen -> drawerState.close()
-                    previewerState.canClose -> {
-                        if (settingState.transformExit) previewerState.exitTransform()
-                        else previewerState.close()
-                    }
                     uiState.messages.isNotEmpty() -> {
                         viewModel.refreshFlexItems()
                         onClearMessages()
@@ -251,36 +224,11 @@ fun GeminiChatScreen(
             isShowButton = true
         )
 
-        //show image
-        TransformImageLazyList(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 8.dp),
-            tempImageUriList = viewModel.tempImageUriList,
-            filteredUriList = viewModel.filteredUriList,
-            deleteUriList = viewModel.deleteUriList,
-            onClick = {
-                scope.launch {
-                    if (settingState.transformEnter) previewerState.enterTransform(it)
-                    else previewerState.open(it)
-                }
-            },
-            onDelete = { viewModel.addDeleteUri(it); },
-            previewerState = previewerState,
-            isShowDelete = true
+        HorizontalCarousel(
+            filterUriList = viewModel.filteredUriList,
+            onItemDelete = { viewModel.addDeleteUri(it) }
         )
     }
-
-    //full screen image
-    ImagePreviewer(
-        state = previewerState,
-        imageLoader = { index ->
-            val painter = if (settingState.loaderError && (index % 2 == 0)) null
-            else rememberCoilImagePainter(image = viewModel.filteredUriList[index])
-
-            return@ImagePreviewer Pair(painter, painter?.intrinsicSize)
-        }
-    )
 
     //bottomSheet
     if (viewModel.openBottomSheet) {

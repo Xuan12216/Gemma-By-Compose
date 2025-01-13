@@ -3,7 +3,6 @@ package com.xuan.gemma.ui.screen
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +21,6 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.xuan.gemma.R
 import com.xuan.gemma.data.NavigationItem
 import com.xuan.gemma.database.Message
-import com.xuan.gemma.database.MessageRepository
 import com.xuan.gemma.`object`.Constant
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.DeleteMessageDialog
@@ -38,8 +35,7 @@ fun MyDrawerLayout(
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
-    val repository = MessageRepository(LocalContext.current)
-    val viewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.getFactory(repository))
+    val viewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.getFactory(LocalContext.current))
 
     // 控制抽屜打開/關閉時的邏輯
     LaunchedEffect(drawerState.isOpen) {
@@ -56,7 +52,7 @@ fun MyDrawerLayout(
     if (viewModel.showRenameDialog && viewModel.renameMessage != null) {
         RenameMessageDialog(
             message = viewModel.renameMessage!!,
-            repository = repository,
+            repository = viewModel.repository,
             onDismiss = {
                 viewModel.showRenameDialog = false
                 viewModel.isRefreshListHistory = true
@@ -67,7 +63,7 @@ fun MyDrawerLayout(
     if (viewModel.showDeleteDialog && viewModel.deleteMessage != null) {
         DeleteMessageDialog(
             message = viewModel.deleteMessage!!,
-            repository = repository,
+            repository = viewModel.repository,
             onDismiss = {
                 viewModel.showDeleteDialog = false
                 viewModel.isRefreshListHistory = true
@@ -109,7 +105,7 @@ fun MyDrawerLayout(
                         when (dropDownItem.text) {
                             Constant.PIN -> {
                                 scope.launch {
-                                    repository.insertOrUpdateMessage(message.copy(isPinned = !message.isPinned))
+                                    viewModel.repository.insertOrUpdateMessage(message.copy(isPinned = !message.isPinned))
                                     viewModel.isRefreshListHistory = true
                                 }
                             }

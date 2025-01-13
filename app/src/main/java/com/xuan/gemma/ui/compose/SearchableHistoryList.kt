@@ -1,6 +1,5 @@
 package com.xuan.gemma.ui.compose
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,12 +10,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.xuan.gemma.R
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.`object`.Constant
@@ -46,24 +45,30 @@ fun SearchableHistoryList(
     }
 
     SearchBar(
-        query = text,
-        onQueryChange = { text = it },
-        onSearch = {  },
-        active = active,
-        onActiveChange = { onActiveChange(it) },
-        placeholder = { Text(stringResource(id = R.string.searchEditText)) },
-        leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-        trailingIcon = {
-            if (active) {
-                IconButton(onClick = {
-                    scope.launch { onActiveChange(false) }
-                    text = ""
-                }) {
-                    Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-                }
-            }
-        },
         modifier = Modifier.fillMaxWidth(),
+        inputField = {
+            SearchBarDefaults. InputField(
+                query = text,
+                onQueryChange = { text = it },
+                onSearch = { },
+                expanded = active,
+                onExpandedChange = { onActiveChange(it) },
+                placeholder = { Text(stringResource(id = R.string.searchEditText)) },
+                leadingIcon = { Icon(Icons. Default. Search, contentDescription = null) },
+                trailingIcon = {
+                    if (active) {
+                        IconButton(onClick = {
+                            scope.launch { onActiveChange(false) }
+                            text = ""
+                        }) {
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+                        }
+                    }
+                }
+            )
+        },
+        expanded = active,
+        onExpandedChange = { onActiveChange(it) },
     ){
         var previousDate = ""
         var isVisible by remember { mutableStateOf(false) }

@@ -130,6 +130,7 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage,imageUris, USER_PREFIX)
             updateDisplayMessages(_uiState.value.messages)
+            updateFilteredUriList()
 
             var currentMessageId: String? = _uiState.value.createLoadingMessage()
             updateDisplayMessages(_uiState.value.messages)

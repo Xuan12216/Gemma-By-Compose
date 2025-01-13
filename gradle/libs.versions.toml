@@ -14,8 +14,6 @@ reactive = "1.0.4"
 glide = "1.0.0-beta01"
 gif = "2.3.0"
 coilCompose = "2.7.0"
-imageViewer = "1.1.0-alpha.5"
-origeek_ui_version = "1.0.1-alpha.7"
 mediapipe_genai = "0.10.20"
 navigation-compose = "2.8.5"
 lifecycle-viewmodel-ktx = "2.8.7"
@@ -26,6 +24,10 @@ ksp = "2.0.0-1.0.22"
 activity = "1.9.3"
 reactivex = "3.0.2"
 uber_autodispose = "1.4.0"
+material = "1.12.0"
+material3 = "1.3.1"
+compose_ui = "1.7.6"
+zoomable = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,22 +38,20 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel-ktx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-ui = { group = "androidx.compose.ui", name = "ui"}
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose_ui"}
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3"}
+android-material = {group = "com.google.android.material", name = "material", version.ref = "material"}
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai"}
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava"}
 reactive = { group = "org.reactivestreams", name = "reactive-streams", version.ref = "reactive"}
 glide = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glide"}
 io-coil-kt = { group = "io.coil-kt", name = "coil-gif", version.ref = "gif"}
 io-coil-kt-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilCompose" }
-image-viewer = { group = "com.jvziyaoyao.scale", name = "image-viewer", version.ref = "imageViewer" }
-sampling-decoder = { group = "com.jvziyaoyao.scale", name = "sampling-decoder", version.ref = "imageViewer" }
-origeek-ui = { group = "com.github.jvziyaoyao", name = "OrigeekUI" , version.ref = "origeek_ui_version"}
 mediapipe_genai = { group = "com.google.mediapipe", name = "tasks-genai", version.ref = "mediapipe_genai"}
 navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose"}
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
@@ -62,6 +62,7 @@ room-ktx = {group = "androidx.room", name = "room-ktx", version.ref = "room_vers
 gson = {group = "com.google.code.gson", name = "gson", version.ref = "gson_version"}
 activity = {group = "androidx.activity", name = "activity-ktx", version.ref = "activity"}
 reactivex = {group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "reactivex"}
+zoomable = {group = "net.engawapg.lib", name = "zoomable", version.ref = "zoomable"}
 uber-autodispose = {group = "com.uber.autodispose", name = "autodispose", version.ref = "uber_autodispose"}
 autodispose-archcomponents = {group = "com.uber.autodispose", name = "autodispose-android-archcomponents", version.ref = "uber_autodispose"}
 

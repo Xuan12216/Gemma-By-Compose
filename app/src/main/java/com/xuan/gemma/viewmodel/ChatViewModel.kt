@@ -120,6 +120,7 @@ class ChatViewModel(
     fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage,imageUris, USER_PREFIX)
+            updateFilteredUriList()
             var currentMessageId: String? = _uiState.value.createLoadingMessage()
             setInputEnabled(false)
             try {

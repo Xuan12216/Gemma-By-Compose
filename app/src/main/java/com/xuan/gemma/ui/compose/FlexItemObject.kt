@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FlexItem (title: String, belowText: String, modifier: Modifier, modifier2: Modifier) {
     Card(
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.cardElevation(0.dp),
         modifier = modifier2
             .padding(start = 16.dp)

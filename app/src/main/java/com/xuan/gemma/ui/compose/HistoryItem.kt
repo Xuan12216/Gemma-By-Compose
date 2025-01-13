@@ -28,7 +28,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -53,11 +55,12 @@ fun HistoryItem(
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
     var itemHeight by remember { mutableStateOf(0.dp) }
     val interactionSource = remember { MutableInteractionSource() }
+    val hapticFeedback = LocalHapticFeedback.current
 
     if (showDate) {
         Text(
             text = message.date.substring(0, 10), // Display only "yyyy/MM/dd"
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp),
+            modifier = Modifier.padding(start = 21.dp, top = 16.dp),
             fontSize = 12.sp
         )
     }
@@ -75,6 +78,7 @@ fun HistoryItem(
                 .pointerInput(true) {
                     detectTapGestures(
                         onLongPress = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             isContextMenuVisible = true
                             pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
                         },
@@ -99,7 +103,7 @@ fun HistoryItem(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(end = 5.dp)
+                        .padding(start = 5.dp, end = 5.dp)
                         .width(30.dp)
                         .height(30.dp)
                 ) {

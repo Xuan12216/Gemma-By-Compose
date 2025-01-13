@@ -34,10 +34,13 @@ class InferenceModel private constructor(private val context: Context) {
     }
 
     fun generateResponseAsync(prompt: String) {
-        // Add the gemma prompt prefix to trigger the response.
-        val prefix = context.getString(R.string.please_ans_with_specified_language)
-        val gemmaPrompt = "$prefix $prompt<start_of_turn>model\n"
-        llmInference.generateResponseAsync(gemmaPrompt)
+        try {
+            // Add the gemma prompt prefix to trigger the response.
+            val prefix = context.getString(R.string.please_ans_with_specified_language)
+            val gemmaPrompt = "$prefix $prompt<start_of_turn>model\n"
+            llmInference.generateResponseAsync(gemmaPrompt)
+        }
+        catch (e: Exception) { e.printStackTrace() }
     }
 
     companion object {
