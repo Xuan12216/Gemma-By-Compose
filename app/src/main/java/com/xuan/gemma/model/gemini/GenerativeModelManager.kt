@@ -43,7 +43,7 @@ class GenerativeModelManager {
         val api: String = pres.getString(Constant.API_KEY, "") ?: ""
         if (api.isEmpty()) return
 
-        val gm1 = GenerativeModel("gemini-1.5-flash", api, generationConfig, safetyList)
+        val gm1 = GenerativeModel("gemini-2.0-flash", api, generationConfig, safetyList)
 
         // 使用 GenerativeModelFutures 创建 GenerativeModelFutures 实例
         generativeModel = GenerativeModelFutures.from(gm1)

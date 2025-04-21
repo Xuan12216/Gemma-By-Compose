@@ -60,6 +60,11 @@ class FileManagerHelper(
         }
     }
 
+    // 检查model文件是否存在
+    fun checkModelFileExits(): Boolean {
+        return checkFileExists("model")
+    }
+
     // 检查指定文件是否存在（不指定文件格式）
     fun checkFileExists(fileNameWithoutExtension: String): Boolean {
         val tempDir = activity.cacheDir
@@ -74,7 +79,7 @@ class FileManagerHelper(
     }
 
     // 删除所有包含 "model" 的文件
-    private fun deleteModelFiles(directory: File) {
+    fun deleteModelFiles(directory: File) {
         val files = directory.listFiles() ?: return
         files.forEach { file ->
             if (file.name.contains("model", ignoreCase = true)) {

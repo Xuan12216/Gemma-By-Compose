@@ -31,7 +31,7 @@ import com.xuan.gemma.activity.LocalMainViewModel
 import com.xuan.gemma.data.ChatMessage
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
-import com.xuan.gemma.ui.carousel.HorizontalCarousel
+import com.xuan.gemma.ui.compose.HorizontalCarousel
 import com.xuan.gemma.ui.compose.AppBar
 import com.xuan.gemma.ui.compose.BottomSheet
 import com.xuan.gemma.ui.compose.ChatItem
@@ -44,10 +44,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun GeminiLayout (
     paddingValues: PaddingValues,
-    drawerState: DrawerState,
     viewModel: GeminiViewModel = viewModel(factory = GeminiViewModel.getFactory(LocalContext.current.applicationContext)),
     active: Boolean,
-    onActiveChange: (Boolean) -> Unit,
     type: String,
     selectedMessage: Message?,
     onSelectedMessageClear: () -> Unit
@@ -82,14 +80,13 @@ fun GeminiLayout (
 
     GeminiChatScreen(
         paddingValues = paddingValues,
-        drawerState = drawerState,
         uiState = uiState,
         textInputEnabled = textInputEnabled,
         onSendMessage = { id, message, imageUris -> viewModel.sendMessage(id, type, message, imageUris, lifecycleOwner.lifecycle) },
         onClearMessages = { viewModel.clearMessages() },
         active = active,
-        onActiveChange = onActiveChange,
-        viewModel = viewModel
+        viewModel = viewModel,
+        type = type
     )
 }
 
@@ -97,14 +94,14 @@ fun GeminiLayout (
 @Composable
 fun GeminiChatScreen(
     paddingValues: PaddingValues,
-    drawerState: DrawerState,
+    drawerState: DrawerState = LocalMainViewModel.current.drawerState.value,
     uiState: UiState,
     textInputEnabled: Boolean = true,
     onSendMessage: (String, String, List<Uri>) -> Unit,
     onClearMessages: () -> Unit,
     active: Boolean,
-    onActiveChange: (Boolean) -> Unit,
-    viewModel: GeminiViewModel
+    viewModel: GeminiViewModel,
+    type: String,
 ) {
     //bottomSheet=====
     val bottomSheetState = rememberModalBottomSheetState()
@@ -124,20 +121,14 @@ fun GeminiChatScreen(
     }
 
     //backHandler=====
-    val backHandlerEnabled = drawerState.isOpen ||  active || uiState.messages.isNotEmpty()
-
-    BackHandler(enabled = backHandlerEnabled) {
-        scope.launch {
-            if (!active) {
-                when {
-                    drawerState.isOpen -> drawerState.close()
-                    uiState.messages.isNotEmpty() -> {
-                        viewModel.refreshFlexItems()
-                        onClearMessages()
-                    }
+    if (!active) {
+        BackHandler(enabled = uiState.messages.isNotEmpty()) {
+            scope.launch {
+                if (uiState.messages.isNotEmpty() && textInputEnabled) {
+                    viewModel.refreshFlexItems()
+                    onClearMessages()
                 }
             }
-            else onActiveChange(false)
         }
     }
 
@@ -177,7 +168,7 @@ fun GeminiChatScreen(
                         .padding(bottom = 30.dp),
                     glideDrawable = R.drawable.sparkle_resting,
                     glideContent = "Welcome Layout",
-                    animatedText = stringResource(id = R.string.welcome_text)
+                    animatedText = stringResource(id = R.string.welcome_text, type)
                 )
             }
             else {

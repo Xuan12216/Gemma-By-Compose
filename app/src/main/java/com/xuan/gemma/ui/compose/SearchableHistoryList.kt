@@ -1,5 +1,6 @@
 package com.xuan.gemma.ui.compose
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.xuan.gemma.R
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.`object`.Constant
@@ -34,9 +36,9 @@ fun SearchableHistoryList(
     var text by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
-    val filteredList = if (text.isEmpty()) {
-        listHistory
-    }
+    LaunchedEffect(active) { if (!active) { text = "" } }
+
+    val filteredList = if (text.isEmpty()) { listHistory }
     else {
         listHistory.filter { message ->
             message.title.contains(text, ignoreCase = true) ||
@@ -69,16 +71,17 @@ fun SearchableHistoryList(
         },
         expanded = active,
         onExpandedChange = { onActiveChange(it) },
+        windowInsets = if (active) SearchBarDefaults.windowInsets else WindowInsets(0.dp)
     ){
         var previousDate = ""
         var isVisible by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
-            delay(250L)
+            delay(280L)
             isVisible = true
         }
 
-        if (isVisible) {
+        if (isVisible && active) {
             LazyColumn {
                 itemsIndexed(filteredList) { index, item ->
                     val currentDate = item.date.substring(0, 10) // Extract "yyyy/MM/dd"

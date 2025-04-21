@@ -182,7 +182,7 @@ class GeminiViewModel( private val appContext: Context ) : ViewModel() {
             val message = Message(
                 id = id,
                 messages = chatMessage,
-                title = chatMessage.last().message,
+                title = AppUtils.getMessageToTitle(chatMessage.last().message),
                 type = type,
                 date = AppUtils.getCurrentDateTime(),
                 isPinned = false

@@ -7,11 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -32,13 +29,13 @@ val LocalMainViewModel = compositionLocalOf<MainViewModel> { error("MainViewMode
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModels { MainViewModel.getFactory() }
+    private val mainViewModel: MainViewModel by viewModels { MainViewModel.getFactory() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        viewModel.init(this, this)
+        mainViewModel.init(this, this)
 
         setContent {
             GemmaTheme {
@@ -47,21 +44,30 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                    var isFileExists by remember { mutableStateOf(mainViewModel.fileManagerHelper.checkModelFileExits()) }
 
                     CompositionLocalProvider(
-                        LocalMainViewModel provides viewModel
+                        LocalMainViewModel provides mainViewModel
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             when {
-                                viewModel.fileManagerHelper.isLoading.value -> LoadingIndicator(message = "Saving Model to Device...")
-                                !viewModel.fileManagerHelper.checkFileExists("model") -> ModelNotFoundScreen(
-                                    fileManagerHelper = viewModel.fileManagerHelper,
-                                    onRefresh = { viewModel.fileManagerHelper.openFileManager() }
-                                )
+                                mainViewModel.fileManagerHelper.isLoading.value -> {
+                                    LoadingIndicator(message = "Saving Model to Device...")
+                                }
+                                !isFileExists -> {
+                                    isFileExists = mainViewModel.fileManagerHelper.checkModelFileExits()
+                                    ModelNotFoundScreen(
+                                        fileManagerHelper = mainViewModel.fileManagerHelper,
+                                        onRefresh = { isFileExists = mainViewModel.fileManagerHelper.checkModelFileExits() },
+                                        context = this@MainActivity
+                                    )
+                                }
                                 else -> AppNavHost(
                                     navController = navController,
-                                    drawerState = drawerState,
+                                    onRetry = {
+                                        mainViewModel.fileManagerHelper.deleteModelFiles(this@MainActivity.cacheDir)
+                                        isFileExists = false
+                                    }
                                 )
                             }
                         }
@@ -74,7 +80,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun AppNavHost(
         navController: NavHostController,
-        drawerState: DrawerState,
+        onRetry: () -> Unit
     ) {
         NavHost(
             navController = navController,
@@ -88,12 +94,12 @@ class MainActivity : ComponentActivity() {
                             launchSingleTop = true
                         }
                     },
-                    onRetry = {viewModel.fileManagerHelper.openFileManager()}
+                    onRetry = { onRetry() }
                 )
             }
 
             composable(CHAT_SCREEN) {
-                MyDrawerLayout(drawerState)
+                MyDrawerLayout()
             }
         }
     }

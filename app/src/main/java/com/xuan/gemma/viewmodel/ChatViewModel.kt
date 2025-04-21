@@ -21,14 +21,16 @@ import com.xuan.gemma.database.MessageRepository
 import com.xuan.gemma.model.InferenceModel
 import com.xuan.gemma.util.AppUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 class ChatViewModel(
-    private val inferenceModel: InferenceModel,
+    private var inferenceModel: InferenceModel,
     private val appContext: Context
 ) : ViewModel() {
 
@@ -36,6 +38,9 @@ class ChatViewModel(
     // Replace `GemmaUiState` with `ChatUiState()` if you're using a different model
     private val _uiState: MutableStateFlow<GemmaUiState> = MutableStateFlow(GemmaUiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _tokensRemaining = MutableStateFlow(-1)
+    val tokensRemaining: StateFlow<Int> = _tokensRemaining.asStateFlow()
 
     private val _textInputEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val isTextInputEnabled: StateFlow<Boolean> = _textInputEnabled.asStateFlow()
@@ -120,32 +125,38 @@ class ChatViewModel(
     fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage,imageUris, USER_PREFIX)
-            updateFilteredUriList()
-            var currentMessageId: String? = _uiState.value.createLoadingMessage()
             setInputEnabled(false)
-            try {
-                val fullPrompt = _uiState.value.fullPrompt
-                inferenceModel.generateResponseAsync(fullPrompt)
-                inferenceModel.partialResults
-                    .collectIndexed { index, (partialResult, done) ->
-                        currentMessageId?.let {
-                            if (index == 0) _uiState.value.appendFirstMessage(it, partialResult)
-                            else _uiState.value.appendMessage(it, partialResult, done)
+            updateFilteredUriList()
 
-                            if (done) {
-                                insertChatMessage(id, type, uiState.value.messages)
-                                currentMessageId = null
-                                filteredUriList.clear()
-                                // Re-enable text input
-                                setInputEnabled(true)
-                            }
-                        }
+            var currentMessageId: String? = _uiState.value.createLoadingMessage()
+            try {
+                //val fullPrompt = _uiState.value.fullPrompt
+                val asyncInference =  inferenceModel.generateResponseAsync(userMessage) { partialResult, done ->
+                    currentMessageId?.let { _uiState.value.appendMessage(it, partialResult, done) }
+                    if (done) {
+                        insertChatMessage(id, type, uiState.value.messages)
+                        currentMessageId = null
+                        filteredUriList.clear()
+                        setInputEnabled(true)// Re-enable text input
                     }
+                    else {
+                        // Reduce current token count (estimate only). sizeInTokens() will be used
+                        // when computation is done
+                        _tokensRemaining.update { max(0, it - 1) }
+                    }
+                }
+                // Once the inference is done, recompute the remaining size in tokens
+                asyncInference.addListener({
+                    viewModelScope.launch(Dispatchers.IO) {
+                        recomputeSizeInTokens(userMessage)
+                    }
+                }, Dispatchers.Main.asExecutor())
             }
             catch (e: Exception) {
                 _uiState.value.addMessage(e.localizedMessage ?: "Unknown Error", emptyList(), MODEL_PREFIX)
                 setInputEnabled(true)
             }
+
         }
     }
 
@@ -158,7 +169,7 @@ class ChatViewModel(
             val message = Message(
                 id = id,
                 messages = chatMessage,
-                title = chatMessage.last().message,
+                title = AppUtils.getMessageToTitle(chatMessage.last().message),
                 type = type,
                 date = AppUtils.getCurrentDateTime(),
                 isPinned = false
@@ -173,6 +184,11 @@ class ChatViewModel(
 
     private fun setInputEnabled(isEnabled: Boolean) {
         _textInputEnabled.value = isEnabled
+    }
+
+    fun recomputeSizeInTokens(message: String) {
+        val remainingTokens = inferenceModel.estimateTokensRemaining(message)
+        _tokensRemaining.value = remainingTokens
     }
 
     companion object {

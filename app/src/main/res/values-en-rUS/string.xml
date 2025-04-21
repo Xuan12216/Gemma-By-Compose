@@ -7,7 +7,7 @@
     <string name="what_is_api_key">What is an API: API keys are usually provided by the API provider and need to be set in the application. An application provides an API key when making a request to the API, which is used by the API provider to verify that the application has permission to access the API. This App must use API.</string>
     <string name="get_api_hint">Don’t have an API key? You can click here</string>
     <string name="editText_empty">Please enter API key</string>
-    <string name="please_ans_with_specified_language">Please Use English Answer: </string>
+    <string name="please_ans_with_specified_language">,Please Use English Answer</string>
 
     <string-array name="settingsItem">
         <item>Set name, picture</item>
@@ -98,44 +98,46 @@
     <string name="record_value">Speak something…</string>
 
     <string-array name="flexboxItem">
-        <item>Plan a trip: Experience Seoul like a local</item>
-        <item>Show me a code snippet: Sticky title for website</item>
-        <item>Get ideas: What to do with my child’s art</item>
-        <item>Compare Business Strategies: Budget to Luxury vs Luxury…</item>
-        <item>Develop an exercise plan: resistance training</item>
-        <item>Brainstorm names: For an orange cat adoption</item>
-        <item>Explain Nostalgia: To a Kindergarten Teacher</item>
-        <item>Create a personal webpage: after three questions</item>
-        <item>Help me choose: a gift for dad who loves fishing</item>
-        <item>Recommended activity: Remote employee team building day…</item>
-        <item>Make family dinners: fresh ingredients, simple recipes</item>
-        <item>Learn a new craft: knitting or pottery making</item>
-        <item>Plan your next vacation: Explore unknown destinations</item>
-        <item>Read a classic novel: rediscover literary charm</item>
-        <item>Challenge yourself: Complete a new sport or challenge</item>
-        <item>Share a food journey: explore local cuisine</item>
-        <item>Participate in volunteer activities: donate time to charity</item>
-        <item>Outline a social media post: for my network</item>
-        <item>Learn a new language: broaden horizons</item>
-        <item>Cook an international dish: taste different cultures</item>
-        <item>Build a family play area: create a happy space</item>
-        <item>Discover a local museum or gallery: appreciate art and history</item>
-        <item>Start a healthy lifestyle: balance exercise, diet, mental health</item>
-        <item>Experience outdoor adventure: hiking, camping, kayaking</item>
-        <item>Learn a new skill: photography, programming, music</item>
-        <item>Plan a family movie night: choose a movie</item>
-        <item>Rearrange a room: Create a welcoming space</item>
-        <item>Attend a cultural event: concert, art exhibition, theater</item>
-        <item>Prepare a homemade brunch: delicious food, pleasant atmosphere</item>
-        <item>Learn how to grow vegetables: enjoy self-sufficiency</item>
+        <item>Plan a trip : Experience Seoul like a local</item>
+        <item>Show me a code snippet : Sticky title for website</item>
+        <item>Get ideas : What to do with my child’s art</item>
+        <item>Compare Business Strategies : Budget to Luxury vs Luxury…</item>
+        <item>Develop an exercise plan : resistance training</item>
+        <item>Brainstorm names : For an orange cat adoption</item>
+        <item>Explain Nostalgia : To a Kindergarten Teacher</item>
+        <item>Create a personal webpage : after three questions</item>
+        <item>Help me choose : a gift for dad who loves fishing</item>
+        <item>Recommended activity : Remote employee team building day…</item>
+        <item>Make family dinners : fresh ingredients, simple recipes</item>
+        <item>Learn a new craft : knitting or pottery making</item>
+        <item>Plan your next vacation : Explore unknown destinations</item>
+        <item>Read a classic novel : rediscover literary charm</item>
+        <item>Challenge yourself : Complete a new sport or challenge</item>
+        <item>Share a food journey : explore local cuisine</item>
+        <item>Participate in volunteer activities : donate time to charity</item>
+        <item>Outline a social media post : for my network</item>
+        <item>Learn a new language : broaden horizons</item>
+        <item>Cook an international dish : taste different cultures</item>
+        <item>Build a family play area : create a happy space</item>
+        <item>Discover a local museum or gallery : appreciate art and history</item>
+        <item>Start a healthy lifestyle : balance exercise, diet, mental health</item>
+        <item>Experience outdoor adventure : hiking, camping, kayaking</item>
+        <item>Learn a new skill : photography, programming, music</item>
+        <item>Plan a family movie night : choose a movie</item>
+        <item>Rearrange a room : Create a welcoming space</item>
+        <item>Attend a cultural event : concert, art exhibition, theater</item>
+        <item>Prepare a homemade brunch : delicious food, pleasant atmosphere</item>
+        <item>Learn how to grow vegetables : enjoy self-sufficiency</item>
     </string-array>
+
+    <string name="flexbox_ai_generate">Get Recommendations : (Enter Area Of Interest)</string>
 
     //pickImage
     <string name="useCameraPickImage">Open Camera</string>
     <string name="useGalleryPickImage">Open Gallery</string>
 
     //welcomeText
-    <string name="welcome_text">Welcome to gemma ! How can I help you today ?</string>
+    <string name="welcome_text">Welcome to %s How can I help you today ?</string>
 
     //addNotes
     <string name="add_notes_toast">New chat added successfully !</string>
@@ -148,7 +150,7 @@
 
     //navigation
     <string name="navigation_history">Recent</string>
-    <string name="searchEditText">Search</string>
+    <string name="searchEditText">Search Chat History</string>
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 
@@ -199,4 +201,8 @@
     <string name="translate_context1">Please help me translate the content,</string>
     <string name="new_translation">New translation</string>
     <string name="translate_history">History</string>
+
+    //tokens
+    <string name="tokens_remaining">tokens remaining</string>
+    <string name="context_full_message">Context full. Refresh session to clear.</string>
 </resources>

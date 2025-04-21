@@ -15,13 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.xuan.gemma.R
 import com.xuan.gemma.data.ChatMessage
-import com.xuan.gemma.ui.carousel.HorizontalCarousel
 
 @Composable
 fun ChatItem(
-    chatMessage: ChatMessage
+    chatMessage: ChatMessage,
+    tokens: Int? = null
 ) {
     val bubbleShape = if (chatMessage.isFromUser) RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
     else RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
@@ -68,6 +70,21 @@ fun ChatItem(
                             HorizontalCarousel (
                                 filterUriList = chatMessage.uris,
                                 onItemDelete = null
+                            )
+                        }
+
+                        if (tokens != null && !chatMessage.isFromUser) {
+                            val text = if (tokens == 0) stringResource(R.string.context_full_message)
+                            else "$tokens ${stringResource(R.string.tokens_remaining)}"
+
+                            val textColor = if (tokens == 0) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface
+
+                            Text(
+                                text = text,
+                                color = textColor,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(16.dp).align(Alignment.End)
                             )
                         }
                     }

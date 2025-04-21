@@ -53,7 +53,7 @@ fun HistoryItem(
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
-    var itemHeight by remember { mutableStateOf(0.dp) }
+    val itemHeight by remember { mutableStateOf(0.dp) }
     val interactionSource = remember { MutableInteractionSource() }
     val hapticFeedback = LocalHapticFeedback.current
 

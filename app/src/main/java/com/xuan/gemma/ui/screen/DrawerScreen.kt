@@ -1,5 +1,6 @@
 package com.xuan.gemma.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.xuan.gemma.R
+import com.xuan.gemma.activity.LocalMainViewModel
 import com.xuan.gemma.data.NavigationItem
 import com.xuan.gemma.database.Message
 import com.xuan.gemma.`object`.Constant
@@ -32,10 +34,17 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyDrawerLayout(
-    drawerState: DrawerState,
+    drawerState: DrawerState = LocalMainViewModel.current.drawerState.value,
 ) {
     val scope = rememberCoroutineScope()
     val viewModel: DrawerViewModel = viewModel(factory = DrawerViewModel.getFactory(LocalContext.current))
+
+    //backHandler=====
+    if (!viewModel.active) {
+        BackHandler(enabled = drawerState.isOpen) {
+            scope.launch { if (drawerState.isOpen) drawerState.close() }
+        }
+    }
 
     // 控制抽屜打開/關閉時的邏輯
     LaunchedEffect(drawerState.isOpen) {
@@ -74,21 +83,20 @@ fun MyDrawerLayout(
     // 主體結構
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = drawerState.isOpen,
         drawerContent = {
-
             val animatedWidth by animateFloatAsState(
                 targetValue = if (viewModel.active) 1f else 0.75f,
                 animationSpec = tween(
-                    durationMillis = 250,
-                    delayMillis = 150,
+                    durationMillis = 280,
+                    delayMillis = 100,
                     easing = LinearOutSlowInEasing
                 ),
                 label = "Drawer Width Animation"
             )
 
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(animatedWidth)
+                modifier = Modifier.fillMaxWidth(animatedWidth),
+                windowInsets = WindowInsets(0.dp)
             ){
                 DrawerContent(
                     items = viewModel.items,
@@ -126,10 +134,8 @@ fun MyDrawerLayout(
         Scaffold { paddingValues ->
             when (viewModel.selectedItemIndex) {
                 0 -> ChatRoute(
-                    drawerState = drawerState,
                     paddingValues = paddingValues,
                     active = viewModel.active,
-                    onActiveChange = { viewModel.active = it },
                     type = viewModel.getType(),
                     selectedMessage = viewModel.selectedMessage,
                     onSelectedMessageClear = {
@@ -138,10 +144,8 @@ fun MyDrawerLayout(
                     }
                 )
                 1 -> GeminiLayout(
-                    drawerState = drawerState,
                     paddingValues = paddingValues,
                     active = viewModel.active,
-                    onActiveChange = { viewModel.active = it },
                     type = viewModel.getType(),
                     selectedMessage = viewModel.selectedMessage,
                     onSelectedMessageClear = {
@@ -187,16 +191,18 @@ fun DrawerContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
-
         //drawer item
-        LazyColumn {
-            itemsIndexed(items) { index, item ->
-                DrawerItem(
-                    item = item,
-                    selected = index == selectedItemIndex,
-                    onClick = { onItemClicked(index) }
-                )
+        if (!active) {
+            Spacer(modifier = Modifier.height(10.dp))
+
+            LazyColumn {
+                itemsIndexed(items) { index, item ->
+                    DrawerItem(
+                        item = item,
+                        selected = index == selectedItemIndex,
+                        onClick = { onItemClicked(index) }
+                    )
+                }
             }
         }
     }
@@ -206,7 +212,9 @@ fun DrawerContent(
 @Composable
 fun DrawerHeader(title: String) {
     Row(
-        modifier = Modifier.padding(top = 20.dp, bottom = 8.dp, start = 4.dp)
+        modifier = Modifier
+            .padding(top = 20.dp, bottom = 8.dp, start = 4.dp)
+            .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
     ) {
         Text(
             text = title,

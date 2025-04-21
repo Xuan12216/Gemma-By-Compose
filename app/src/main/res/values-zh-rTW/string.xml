@@ -7,7 +7,7 @@
     <string name="what_is_api_key">何謂API：API 金鑰通常由 API 提供者提供，並且需要在應用程式中設定。應用程式在向 API 發出請求時會提供 API 密鑰，API 提供者會使用該密鑰來驗證應用程式是否有權存取 API。本App必須使用API。</string>
     <string name="get_api_hint">沒有 API key ? 可以點 這裏</string>
     <string name="editText_empty">請輸入API key</string>
-    <string name="please_ans_with_specified_language">請使用繁體中文回答: </string>
+    <string name="please_ans_with_specified_language">,請用繁體中文回答</string>
 
     <string-array name="settingsItem">
         <item>設定名字，圖片</item>
@@ -131,12 +131,14 @@
         <item>學習如何種植自己的蔬菜 : 享受自給自足的樂趣</item>
     </string-array>
 
+    <string name="flexbox_ai_generate">取得建議 : (輸入感興趣的領域)</string>
+
     //pickImage
     <string name="useCameraPickImage">打开相机</string>
     <string name="useGalleryPickImage">打开图库</string>
 
     //welcomeText
-    <string name="welcome_text">歡迎來到 gemma！ 有什麼問題或需求我可以幫你解決嗎？</string>
+    <string name="welcome_text">歡迎來到 %s 有什麼問題或需求我可以幫你解決嗎？</string>
 
     //addNotes
     <string name="add_notes_toast">添加新聊天成功！</string>
@@ -149,7 +151,7 @@
 
     //navigation
     <string name="navigation_history">歷史記錄</string>
-    <string name="searchEditText">搜尋</string>
+    <string name="searchEditText">搜尋對話記錄</string>
     <string name="today">今日</string>
     <string name="yesterday">昨天</string>
 
@@ -200,4 +202,8 @@
     <string name="translate_context1">請幫我翻譯内容，</string>
     <string name="new_translation">新翻譯</string>
     <string name="translate_history">翻譯記錄</string>
+
+    //tokens
+    <string name="tokens_remaining">剩餘字元數</string>
+    <string name="context_full_message">內容已滿, 請開啟新對話。</string>
 </resources>

@@ -2,6 +2,9 @@ package com.xuan.gemma.viewmodel
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -15,6 +18,8 @@ class MainViewModel : ViewModel() {
     val pickImage = PickImageFunc()
     val pickImageUsingCamera = PickImageUsingCamera()
     val recordFunc = RecordFunc()
+
+    val drawerState = mutableStateOf(DrawerState(DrawerValue.Closed))
 
     lateinit var fileManagerHelper: FileManagerHelper
 

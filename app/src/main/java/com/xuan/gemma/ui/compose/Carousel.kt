@@ -1,4 +1,4 @@
-package com.xuan.gemma.ui.carousel
+package com.xuan.gemma.ui.compose
 
 import android.net.Uri
 import androidx.compose.animation.core.animateDpAsState
@@ -71,12 +71,12 @@ fun HorizontalCarousel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
+                .maskClip(MaterialTheme.shapes.large)
         ) {
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp)
-                    .maskClip(MaterialTheme.shapes.large)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
@@ -142,12 +142,8 @@ fun FullScreenCarousel(
     fullScreenStartIndex: Int,
     onDismiss: () -> Unit
 ) {
-    Dialog(
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false,
-        ),
-        onDismissRequest = { onDismiss() },
+    BaseFullScreenDialog(
+        onDismiss = { onDismiss() },
         content = {
             val configuration = LocalConfiguration.current
             val preferredItemWidth = (configuration.screenWidthDp).dp
@@ -179,10 +175,10 @@ fun FullScreenCarousel(
                     Box (
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .size(45.dp)
+                            .size(50.dp)
                             .padding(end = 16.dp, top = 16.dp)
                             .background(
-                                color = Color.Black.copy(alpha = 0.35f),
+                                color = Color.DarkGray.copy(alpha = 0.4f),
                                 shape = MaterialTheme.shapes.extraLarge
                             )
                     ){
@@ -191,7 +187,7 @@ fun FullScreenCarousel(
                             modifier = Modifier
                                 .padding(5.dp)
                                 .align(Alignment.Center)
-                                .size(30.dp)
+                                .size(50.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_close_24),
@@ -205,4 +201,3 @@ fun FullScreenCarousel(
         }
     )
 }
-

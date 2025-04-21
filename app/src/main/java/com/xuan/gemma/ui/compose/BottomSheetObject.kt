@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.xuan.gemma.activity.LocalMainViewModel
@@ -43,6 +43,7 @@ fun BottomSheet(
             scope.launch { bottomSheetState.hide() }
         },
         sheetState = bottomSheetState,
+        contentWindowInsets = { WindowInsets(0.dp) },
         content = {
             Column(
                 modifier = Modifier
@@ -58,7 +59,8 @@ fun BottomSheet(
                                     pickImageUsingCamera.startPickImage { compressedUri ->
                                         onCallbackImageUri(compressedUri)
                                     }
-                                } else if (option.third == 2) {
+                                }
+                                else if (option.third == 2) {
                                     pickImageFunc.startPickImage { compressedUri ->
                                         onCallbackImageUri(compressedUri)
                                     }
@@ -92,6 +94,5 @@ fun BottomSheet(
                 }
             }
         },
-        scrimColor = Color.Black.copy(alpha = 0.6f),
     )
 }
