@@ -1,14 +1,16 @@
 package com.xuan.gemma.ui.screen
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +32,7 @@ import com.xuan.gemma.activity.LocalMainViewModel
 import com.xuan.gemma.data.ChatMessage
 import com.xuan.gemma.data.stateObject.UiState
 import com.xuan.gemma.database.Message
+import com.xuan.gemma.model.InferenceModel
 import com.xuan.gemma.ui.compose.HorizontalCarousel
 import com.xuan.gemma.viewmodel.ChatViewModel
 import com.xuan.gemma.ui.compose.AppBar
@@ -44,33 +47,46 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun ChatRoute(
     paddingValues: PaddingValues,
-    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory(LocalContext.current.applicationContext)),
     active: Boolean,
     type: String,
     selectedMessage: Message?,
     onSelectedMessageClear: () -> Unit
     ) {
+
+    val context = LocalContext.current.applicationContext
+    val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory(context))
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
 
-    selectedMessage?.let { message ->
-        chatViewModel.clearMessages(message.id)
-        val newMessages = message.messages.map { chat ->
-            ChatMessage(
-                rawMessage = chat.message,
-                uris = chat.uris,
-                author = chat.author
-            )
-        }
+    // Reset InferenceModel when entering ChatScreen
+    LaunchedEffect(Unit) {
+        val inferenceModel = InferenceModel.getInstance(context)
+        chatViewModel.resetInferenceModel(inferenceModel)
+    }
 
-        // 在修改完 _uiState.value.messages 后，再将消息插入到数据库
-        newMessages.reversed().forEach { chat ->
-            chatViewModel.addMessage(chat.message, chat.uris, chat.author)
+    LaunchedEffect(selectedMessage) {
+        selectedMessage?.let { message ->
+            chatViewModel.selectedMessage = selectedMessage
+            chatViewModel.clearMessages(message.id)
+            val newMessages = message.messages.map { chat ->
+                ChatMessage(
+                    rawMessage = chat.message,
+                    uris = chat.uris,
+                    author = chat.author,
+                )
+            }
+
+            // 在修改完 _uiState.value.messages 后，再将消息插入到数据库
+            newMessages.reversed().forEach { chat ->
+                chatViewModel.addMessage(chat.message, chat.uris, chat.author)
+            }
+            chatViewModel.recomputeSizeInTokens("")
+            onSelectedMessageClear()
         }
-        onSelectedMessageClear()
     }
 
     ChatScreen(
+        context = context,
         paddingValues = paddingValues,
         uiState = uiState,
         textInputEnabled = textInputEnabled,
@@ -80,9 +96,6 @@ internal fun ChatRoute(
         chatViewModel = chatViewModel,
         type = type,
         remainingTokens = chatViewModel.tokensRemaining,
-        resetTokenCount = {
-            chatViewModel.recomputeSizeInTokens("")
-        },
         onChangedMessage = { message ->
             chatViewModel.recomputeSizeInTokens(message)
         }
@@ -92,6 +105,7 @@ internal fun ChatRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
+    context: Context,
     paddingValues: PaddingValues,
     drawerState: DrawerState = LocalMainViewModel.current.drawerState.value,
     uiState: UiState,
@@ -102,7 +116,6 @@ fun ChatScreen(
     chatViewModel: ChatViewModel,
     type: String,
     remainingTokens: StateFlow<Int>,
-    resetTokenCount: () -> Unit,
     onChangedMessage: (String) -> Unit,
 ) {
     //bottomSheet=====
@@ -142,6 +155,7 @@ fun ChatScreen(
         modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
+        .imePadding()
     ) {
         //AppBar=====
         AppBar(
@@ -151,6 +165,7 @@ fun ChatScreen(
                     scope.launch { drawerState.open() }
                 }
                 else {
+                    InferenceModel.getInstance(context).resetSession()
                     chatViewModel.refreshFlexItems()
                     onClearMessages()
                 }
@@ -175,12 +190,14 @@ fun ChatScreen(
             }
             else {
                 //mainLayout
+                val messages = uiState.messages.reversed()
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.weight(1f),
                 ) {
-                    items(uiState.messages.reversed().toList()) { chat ->
-                        ChatItem(chat, tokens)
+                    itemsIndexed(messages.toList()) { index, chat ->
+                        val isLastItem = index == messages.lastIndex
+                        ChatItem(chat, tokens = if (isLastItem) tokens else null)
                     }
                 }
             }
@@ -196,13 +213,14 @@ fun ChatScreen(
 
         //pickImage Func and textField
         TextFieldLayout(
-            textInputEnabled = textInputEnabled,
+            textInputEnabled = textInputEnabled && tokens > 0,
             filledIconBtnOnClick = { scope.launch { chatViewModel.toggleBottomSheet(true) }},
             filledIconPainter = painterResource(id = R.drawable.baseline_add_24),
             filledIconContent = "Insert Image",
             textFieldText = chatViewModel.userMessage,
             onTextFieldChange = { chatViewModel.updateUserMessage(it) },
             onTextFieldAdd = {
+                onChangedMessage(it)
                 onSendMessage(uiState.id, chatViewModel.userMessage, chatViewModel.filteredUriList)
                 chatViewModel.updateUserMessage("")
                 chatViewModel.clearTempAndDeleteUriLists()

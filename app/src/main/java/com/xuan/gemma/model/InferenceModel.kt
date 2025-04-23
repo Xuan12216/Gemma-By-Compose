@@ -7,7 +7,7 @@ import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions
 import com.google.mediapipe.tasks.genai.llminference.ProgressListener
-import com.xuan.gemma.R
+import com.xuan.gemma.data.stateObject.GemmaUiState
 import com.xuan.gemma.data.stateObject.UiState
 import java.io.File
 import kotlin.math.max
@@ -20,27 +20,40 @@ var MAX_TOKENS = 8192
  * we compute the remaining context length.
  */
 var DECODE_TOKEN_OFFSET = 256
-
 class ModelLoadFailException :
     Exception("Failed to load model, please try again")
 
 class ModelSessionCreateFailException :
     Exception("Failed to create model session, please try again")
 
-class InferenceModel private constructor(private val context: Context) {
+class InferenceModel private constructor(context: Context) {
     private lateinit var llmInference: LlmInference
     private lateinit var llmInferenceSession: LlmInferenceSession
     private val TAG = InferenceModel::class.qualifiedName
 
-    val uiState: UiState
+    var uiState: UiState
 
     init {
         val modelFile = findModelFile(context.cacheDir)
             ?: throw IllegalArgumentException("Model not found at path: ${context.cacheDir}/$MODEL_NAME")
 
-        uiState = model.uiState
+        uiState = GemmaUiState()
         createEngine(context, modelFile)
         createSession()
+    }
+
+    fun close() {
+        llmInferenceSession.close()
+        llmInference.close()
+    }
+
+    fun resetSession() {
+        llmInferenceSession.close()
+        createSession()
+    }
+
+    fun resetUiState(id: String = "") {
+        uiState = GemmaUiState(id)
     }
 
     private fun createEngine(context: Context, modelFile: File) {
@@ -77,30 +90,14 @@ class InferenceModel private constructor(private val context: Context) {
     }
 
     fun generateResponseAsync(prompt: String, progressListener: ProgressListener<String>) : ListenableFuture<String> {
-        val formattedPrompt = model.uiState.formatPrompt(prompt)
+        val formattedPrompt = uiState.formatPrompt(prompt)
         llmInferenceSession.addQueryChunk(formattedPrompt)
-
-        val postfix = context.getString(R.string.please_ans_with_specified_language)
-        var gemmaPrompt = "$prompt $postfix<start_of_turn>model\n"
-        var totalTokens = llmInferenceSession.sizeInTokens(gemmaPrompt)
-        val maxTokens = MAX_TOKENS / 2
-
-        if (totalTokens > maxTokens) {
-            var reducedPrompt = prompt
-            reducedPrompt = reducedPrompt.replace(Regex("\\s+"), "").trim()
-            while (totalTokens > maxTokens && reducedPrompt.isNotEmpty()) {
-                reducedPrompt = reducedPrompt.drop(50)
-                gemmaPrompt = "$reducedPrompt $postfix<start_of_turn>model\n"
-                totalTokens = llmInferenceSession.sizeInTokens(gemmaPrompt)
-            }
-        }
-
         return llmInferenceSession.generateResponseAsync(progressListener)
     }
 
     fun estimateTokensRemaining(prompt: String): Int {
         val context = uiState.messages.joinToString { it.rawMessage } + prompt
-        if (context.isEmpty()) return -1 // Specia marker if no content has been added
+        if (context.isEmpty()) return MAX_TOKENS // Specia marker if no content has been added
 
         val sizeOfAllMessages = llmInferenceSession.sizeInTokens(context)
         val approximateControlTokens = uiState.messages.size * 3
@@ -117,6 +114,10 @@ class InferenceModel private constructor(private val context: Context) {
         // 获取 InferenceModel 实例
         fun getInstance(context: Context): InferenceModel {
             return instance ?: InferenceModel(context).also { instance = it }
+        }
+
+        fun resetInstance(context: Context): InferenceModel {
+            return InferenceModel(context).also { instance = it }
         }
 
         // 遍历缓存目录，查找与指定文件名匹配的文件（不包括扩展名）

@@ -47,8 +47,8 @@ data class DropDownItem(
 fun HistoryItem(
     message: Message,
     dropdownItems: List<DropDownItem>,
-    onItemClick: (Message) -> Unit,
-    onItemLongClick: (DropDownItem, Message) -> Unit,
+    onItemClick: (String) -> Unit,
+    onItemLongClick: (DropDownItem, String) -> Unit,
     showDate: Boolean
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
@@ -88,7 +88,7 @@ fun HistoryItem(
                             tryAwaitRelease()
                             interactionSource.emit(PressInteraction.Release(press))
                         },
-                        onTap = { if (!isContextMenuVisible) onItemClick(message) }
+                        onTap = { if (!isContextMenuVisible) onItemClick(message.id) }
                     )
                 }
                 .padding(top = 16.dp, bottom = 16.dp)
@@ -137,7 +137,7 @@ fun HistoryItem(
                 DropdownMenuItem(
                     text = { Text(text = it.text,) },
                     onClick = {
-                        onItemLongClick(it, message)
+                        onItemLongClick(it, message.id)
                         isContextMenuVisible = false
                     }
                 )

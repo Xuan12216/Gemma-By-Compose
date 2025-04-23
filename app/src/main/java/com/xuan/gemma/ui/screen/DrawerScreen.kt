@@ -106,24 +106,30 @@ fun MyDrawerLayout(
                         viewModel.selectedItemIndex = index
                         scope.launch { drawerState.close() }
                     },
-                    onSearchHistoryItemClicked = { viewModel.selectedMessage = it },
+                    onSearchHistoryItemClicked = { id ->
+                        val message = viewModel.listHistory.find { it.id == id }
+                        if (null != message) viewModel.selectedMessage = message
+                    },
                     listHistory = viewModel.listHistory,
                     onActiveChange = { viewModel.active = it },
-                    onItemLongClick = { dropDownItem, message ->
-                        when (dropDownItem.text) {
-                            Constant.PIN -> {
-                                scope.launch {
-                                    viewModel.repository.insertOrUpdateMessage(message.copy(isPinned = !message.isPinned))
-                                    viewModel.isRefreshListHistory = true
+                    onItemLongClick = { dropDownItem, messageId ->
+                        val message = viewModel.listHistory.find { it.id == messageId }
+                        if (null != message) {
+                            when (dropDownItem.text) {
+                                Constant.PIN -> {
+                                    scope.launch {
+                                        viewModel.repository.insertOrUpdateMessage(message.copy(isPinned = !message.isPinned))
+                                        viewModel.isRefreshListHistory = true
+                                    }
                                 }
-                            }
-                            Constant.RENAME -> {
-                                viewModel.renameMessage = message
-                                viewModel.showRenameDialog = true
-                            }
-                            Constant.DELETE -> {
-                                viewModel.deleteMessage = message
-                                viewModel.showDeleteDialog = true
+                                Constant.RENAME -> {
+                                    viewModel.renameMessage = message
+                                    viewModel.showRenameDialog = true
+                                }
+                                Constant.DELETE -> {
+                                    viewModel.deleteMessage = message
+                                    viewModel.showDeleteDialog = true
+                                }
                             }
                         }
                     }
@@ -167,10 +173,10 @@ fun DrawerContent(
     selectedItemIndex: Int,
     active: Boolean,
     onItemClicked: (Int) -> Unit,
-    onSearchHistoryItemClicked: (Message) -> Unit,
+    onSearchHistoryItemClicked: (String) -> Unit,
     listHistory: List<Message>,
     onActiveChange: (Boolean) -> Unit,
-    onItemLongClick: (DropDownItem, Message) -> Unit
+    onItemLongClick: (DropDownItem, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -186,8 +192,8 @@ fun DrawerContent(
             onItemClicked = onSearchHistoryItemClicked,
             active = active,
             onActiveChange = onActiveChange,
-            onItemLongClick = {  dropDownItem, message ->
-                onItemLongClick(dropDownItem, message)
+            onItemLongClick = {  dropDownItem, messageId ->
+                onItemLongClick(dropDownItem, messageId)
             }
         )
 

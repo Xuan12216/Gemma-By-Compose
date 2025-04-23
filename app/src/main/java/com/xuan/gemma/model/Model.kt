@@ -12,7 +12,6 @@ enum class Model(
     val licenseUrl: String,
     val needsAuth: Boolean,
     val preferredBackend: Backend?,
-    val uiState: UiState,
     val temperature: Float,
     val topK: Int,
     val topP: Float,
@@ -23,7 +22,6 @@ enum class Model(
         licenseUrl = "https://huggingface.co/litert-community/Gemma3-1B-IT",
         needsAuth = true,
         preferredBackend = Backend.CPU,
-        uiState = GemmaUiState(),
         temperature = 1f,
         topK = 64,
         topP = 0.95f

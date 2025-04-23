@@ -12,7 +12,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.xuan.gemma.R
 import com.xuan.gemma.data.ChatMessage
-import com.xuan.gemma.data.stateObject.GemmaUiState
 import com.xuan.gemma.data.stateObject.MODEL_PREFIX
 import com.xuan.gemma.data.stateObject.USER_PREFIX
 import com.xuan.gemma.data.stateObject.UiState
@@ -36,7 +35,7 @@ class ChatViewModel(
 
     // `GemmaUiState()` is optimized for the Gemma model.
     // Replace `GemmaUiState` with `ChatUiState()` if you're using a different model
-    private val _uiState: MutableStateFlow<GemmaUiState> = MutableStateFlow(GemmaUiState())
+    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(inferenceModel.uiState)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _tokensRemaining = MutableStateFlow(-1)
@@ -46,6 +45,8 @@ class ChatViewModel(
     val isTextInputEnabled: StateFlow<Boolean> = _textInputEnabled.asStateFlow()
 
     private val repository = MessageRepository(appContext)
+
+    var selectedMessage by mutableStateOf<Message?>(null)
 
     //===========
 
@@ -67,6 +68,7 @@ class ChatViewModel(
     //=====
 
     init {
+        recomputeSizeInTokens("")
         refreshFlexItems()
     }
 
@@ -120,6 +122,11 @@ class ChatViewModel(
         flexItem.addAll(randomIndices.map { flexboxItemArray[it] })
     }
 
+    fun resetInferenceModel(newModel: InferenceModel) {
+        inferenceModel = newModel
+        _uiState.value = inferenceModel.uiState
+    }
+
     //==========
 
     fun sendMessage(id: String, type: String, userMessage: String, imageUris: List<Uri>) {
@@ -131,7 +138,7 @@ class ChatViewModel(
             var currentMessageId: String? = _uiState.value.createLoadingMessage()
             try {
                 //val fullPrompt = _uiState.value.fullPrompt
-                val asyncInference =  inferenceModel.generateResponseAsync(userMessage) { partialResult, done ->
+                val asyncInference = inferenceModel.generateResponseAsync(userMessage) { partialResult, done ->
                     currentMessageId?.let { _uiState.value.appendMessage(it, partialResult, done) }
                     if (done) {
                         insertChatMessage(id, type, uiState.value.messages)
@@ -169,17 +176,22 @@ class ChatViewModel(
             val message = Message(
                 id = id,
                 messages = chatMessage,
-                title = AppUtils.getMessageToTitle(chatMessage.last().message),
+                title = selectedMessage?.title.takeIf { !it.isNullOrBlank() }
+                    ?: AppUtils.getMessageToTitle(chatMessage.last().message),
                 type = type,
                 date = AppUtils.getCurrentDateTime(),
-                isPinned = false
+                isPinned = selectedMessage?.isPinned ?: false
             )
             repository.insertOrUpdateMessage(message)
+            selectedMessage = null
         }
     }
 
     fun clearMessages(id: String = "") {
-        _uiState.value = GemmaUiState(newId = id) // or ChatUiState() if you're using a different model
+        inferenceModel.resetUiState(id)
+        _uiState.value = inferenceModel.uiState // or ChatUiState() if you're using a different model
+        recomputeSizeInTokens("")
+        selectedMessage = null
     }
 
     private fun setInputEnabled(isEnabled: Boolean) {

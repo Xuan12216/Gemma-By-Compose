@@ -28,10 +28,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchableHistoryList(
     listHistory: List<Message>,
-    onItemClicked: (Message) -> Unit,
+    onItemClicked: (String) -> Unit,
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
-    onItemLongClick: (DropDownItem, Message) -> Unit,
+    onItemLongClick: (DropDownItem, String) -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -95,13 +95,13 @@ fun SearchableHistoryList(
                             DropDownItem(Constant.RENAME),
                             DropDownItem(Constant.DELETE),
                         ),
-                        onItemClick = { message ->
-                            onItemClicked(message)
+                        onItemClick = { messageId ->
+                            onItemClicked(messageId)
                             scope.launch { onActiveChange(false) }
                             text = ""
                         },
-                        onItemLongClick = { dropDownItem, message ->
-                            onItemLongClick(dropDownItem, message)
+                        onItemLongClick = { dropDownItem, messageId ->
+                            onItemLongClick(dropDownItem, messageId)
                         },
                         showDate = showDate // Pass the flag to show date
                     )

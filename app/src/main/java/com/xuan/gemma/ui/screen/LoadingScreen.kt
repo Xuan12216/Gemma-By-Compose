@@ -45,7 +45,7 @@ internal fun LoadingRoute(
         // Create the LlmInference in a separate thread
         withContext(Dispatchers.IO) {
             try {
-                InferenceModel.getInstance(context)
+                InferenceModel.resetInstance(context)
                 // Notify the UI that the model has finished loading
                 withContext(Dispatchers.Main) {
                     onModelLoaded()

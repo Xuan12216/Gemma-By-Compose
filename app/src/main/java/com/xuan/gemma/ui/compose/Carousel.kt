@@ -33,8 +33,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.xuan.gemma.R
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -53,30 +51,28 @@ fun HorizontalCarousel(
 
     if (filterUriList.isEmpty()) isLongPressed = false
     val animatedHeight by animateDpAsState(
-        targetValue = if (filterUriList.isEmpty()) 0.dp else 146.dp,
+        targetValue = if (filterUriList.isEmpty()) 0.dp else 95.dp,
         animationSpec = if (filterUriList.isEmpty()) spring(stiffness = 300f) else snap(),
         label = "CloseAnimation"
     )
 
-    HorizontalMultiBrowseCarousel(
+    HorizontalMultiBrowseCarousel (
         state = CarouselState { filterUriList.size },
         modifier = Modifier.fillMaxWidth().height(animatedHeight),
-        preferredItemWidth = 120.dp,
-        itemSpacing = 8.dp,
+        preferredItemWidth = 100.dp,
+        itemSpacing = 6.dp,
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) { i ->
         val item = filterUriList[i]
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(130.dp)
+                .size(90.dp)
                 .maskClip(MaterialTheme.shapes.large)
         ) {
             Image(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
+                    .size(90.dp)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
